@@ -38,6 +38,24 @@ cold-storage/
 
 **Note:** Audit reports in `audits/reports/` should be committed to version control. They provide historical traceability for architectural decisions.
 
+## Automated PR Auditing (GitHub Action)
+
+The template includes `.github/workflows/gemini-audit.yml` — a GitHub Action that automatically calls Gemini to audit every PR.
+
+**What it does:**
+- Triggers on PR open/push (skips drafts)
+- Sends the PR diff + your `GEMINI.md` + `blueprint.md` to Gemini 2.5 Flash
+- Posts a comment with the audit result (CLEAR / WARN / FAIL)
+- Fails the check on FAIL verdict
+
+**Setup:**
+1. Add `GEMINI_API_KEY` to your repo's GitHub Secrets
+2. (Optional) Go to Settings → Branch Protection → require the "Gemini Adversarial Audit" check to block merges on FAIL
+
+**Security:** Uses `pull_request` (not `pull_request_target`), so fork PRs cannot access your secrets. Uses `systemInstruction` to resist prompt injection from malicious diffs.
+
+**Cost:** ~$0.003 per audit (Gemini 2.5 Flash). Pennies per month even on active repos.
+
 ## The Hard Rules
 
 1. **No self-approval** — Claude cannot merge without Gemini CLEAR
