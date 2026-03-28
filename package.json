@@ -1,0 +1,49 @@
+{
+  "name": "drydock-masters",
+  "version": "0.1.0",
+  "description": "Drydock Masters - A semi-cooperative digital board game of shipyard management",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "server": "tsx src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anguijm/PM-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Anguijm/PM-game/issues"
+  },
+  "homepage": "https://github.com/Anguijm/PM-game#readme",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "boardgame.io": "^0.50.2",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "next": "^16.2.1",
+    "postcss": "^8.5.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "jsdom": "^29.0.1",
+    "vitest": "^4.1.2"
+  }
+}

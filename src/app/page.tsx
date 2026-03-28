@@ -1,0 +1,308 @@
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import { BOT_STRATEGIES, type BotStrategy } from "@/game/bot";
+import { createMatch, findMatch, joinMatch } from "@/lib/lobby";
+import { cn } from "@/lib/cn";
+
+const BoardgameClient = dynamic(
+  () => import("@/components/client/BoardgameClient"),
+  { ssr: false }
+);
+
+const OnlineClient = dynamic(
+  () => import("@/components/client/OnlineClient"),
+  { ssr: false }
+);
+
+type GameMode = "menu" | "local-setup" | "local-playing" | "online";
+
+interface OnlineSession {
+  matchID: string;
+  playerID: string;
+  credentials: string;
+  roomCode: string;
+}
+
+export default function Home() {
+  const [mode, setMode] = useState<GameMode>("menu");
+  const [numPlayers, setNumPlayers] = useState(2);
+  const [botSlots, setBotSlots] = useState<Record<string, BotStrategy | "human">>({
+    "0": "human",
+    "1": "balanced",
+  });
+
+  // Online state
+  const [onlineSession, setOnlineSession] = useState<OnlineSession | null>(null);
+  const [roomCode, setRoomCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
+  const [onlineNumPlayers, setOnlineNumPlayers] = useState(2);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [createdRoomCode, setCreatedRoomCode] = useState("");
+
+  function updatePlayerCount(n: number) {
+    setNumPlayers(n);
+    const newSlots: Record<string, BotStrategy | "human"> = { "0": "human" };
+    for (let i = 1; i < n; i++) {
+      newSlots[String(i)] = botSlots[String(i)] || "balanced";
+    }
+    setBotSlots(newSlots);
+  }
+
+  async function handleCreateRoom() {
+    setError("");
+    setLoading(true);
+    try {
+      const { matchID, roomCode: code } = await createMatch(onlineNumPlayers);
+      setCreatedRoomCode(code);
+
+      // Auto-join as first player
+      const session = await joinMatch(matchID, playerName || "Player 1");
+      setOnlineSession({ ...session, matchID, roomCode: code });
+    } catch (e: any) {
+      setError(e.message || "Failed to create room");
+    }
+    setLoading(false);
+  }
+
+  async function handleJoinRoom() {
+    setError("");
+    setLoading(true);
+    try {
+      const matchID = await findMatch(roomCode.toUpperCase());
+      if (!matchID) {
+        setError("Room not found. Check the code.");
+        setLoading(false);
+        return;
+      }
+      const session = await joinMatch(matchID, playerName || "Player");
+      setOnlineSession({ ...session, matchID, roomCode: roomCode.toUpperCase() });
+    } catch (e: any) {
+      setError(e.message || "Failed to join room");
+    }
+    setLoading(false);
+  }
+
+  // Playing local
+  if (mode === "local-playing") {
+    return <BoardgameClient numPlayers={numPlayers} botSlots={botSlots} />;
+  }
+
+  // Playing online
+  if (mode === "online" && onlineSession) {
+    return (
+      <OnlineClient
+        matchID={onlineSession.matchID}
+        playerID={onlineSession.playerID}
+        credentials={onlineSession.credentials}
+      />
+    );
+  }
+
+  // Menu
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold text-steel-100 tracking-tight">
+          DRYDOCK MASTERS
+        </h1>
+        <p className="mt-2 text-navy-400 text-lg">
+          Regional Maintenance Center — Shipyard Operations
+        </p>
+      </div>
+
+      {mode === "menu" && (
+        <div className="flex flex-col items-center gap-4 w-80">
+          <button
+            onClick={() => setMode("local-setup")}
+            className="w-full rounded-lg bg-amber-500 py-3 text-lg font-bold text-navy-900 hover:bg-amber-400 transition-colors"
+          >
+            LOCAL PLAY
+          </button>
+          <button
+            onClick={() => setMode("online")}
+            className="w-full rounded-lg border border-die-blue bg-die-blue/10 py-3 text-lg font-bold text-die-blue hover:bg-die-blue/20 transition-colors"
+          >
+            ONLINE PLAY
+          </button>
+          <p className="text-sm text-navy-600">
+            Local: hot-seat with bots | Online: room codes
+          </p>
+        </div>
+      )}
+
+      {/* Online setup */}
+      {mode === "online" && !onlineSession && (
+        <div className="flex flex-col items-center gap-6 rounded-xl border border-navy-600 bg-navy-800 p-8 w-96">
+          <button
+            onClick={() => setMode("menu")}
+            className="self-start text-xs text-navy-400 hover:text-navy-200"
+          >
+            &larr; Back
+          </button>
+
+          {/* Player name */}
+          <label className="flex flex-col gap-1 w-full">
+            <span className="text-xs text-navy-200 uppercase tracking-wider">
+              Your Name
+            </span>
+            <input
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Superintendent"
+              className="rounded bg-navy-700 border border-navy-600 px-3 py-2 text-steel-100 text-sm"
+            />
+          </label>
+
+          {/* Create room */}
+          <div className="w-full space-y-2">
+            <span className="text-xs text-navy-200 uppercase tracking-wider">
+              Create a Room
+            </span>
+            <div className="flex gap-2">
+              {[2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setOnlineNumPlayers(n)}
+                  className={cn(
+                    "flex-1 rounded-lg py-2 text-lg font-bold transition-colors",
+                    onlineNumPlayers === n
+                      ? "bg-die-blue text-white"
+                      : "bg-navy-700 text-navy-200 hover:bg-navy-600"
+                  )}
+                >
+                  {n}P
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleCreateRoom}
+              disabled={loading}
+              className="w-full rounded bg-die-blue py-2 text-sm font-bold text-white hover:bg-die-blue/80 disabled:opacity-50 transition-colors"
+            >
+              {loading ? "Creating..." : "CREATE ROOM"}
+            </button>
+            {createdRoomCode && !onlineSession && (
+              <div className="text-center">
+                <p className="text-xs text-navy-400">Room Code:</p>
+                <p className="text-2xl font-bold text-amber-400 tracking-widest">
+                  {createdRoomCode}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1 h-px bg-navy-600" />
+            <span className="text-xs text-navy-400">OR</span>
+            <div className="flex-1 h-px bg-navy-600" />
+          </div>
+
+          {/* Join room */}
+          <div className="w-full space-y-2">
+            <span className="text-xs text-navy-200 uppercase tracking-wider">
+              Join a Room
+            </span>
+            <input
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+              placeholder="Enter 6-letter code"
+              maxLength={6}
+              className="w-full rounded bg-navy-700 border border-navy-600 px-3 py-2 text-steel-100 text-sm text-center tracking-widest uppercase"
+            />
+            <button
+              onClick={handleJoinRoom}
+              disabled={loading || roomCode.length < 6}
+              className="w-full rounded bg-success py-2 text-sm font-bold text-navy-900 hover:bg-success/80 disabled:opacity-50 transition-colors"
+            >
+              {loading ? "Joining..." : "JOIN ROOM"}
+            </button>
+          </div>
+
+          {error && (
+            <p className="text-sm text-alert-red">{error}</p>
+          )}
+        </div>
+      )}
+
+      {/* Local setup */}
+      {mode === "local-setup" && (
+        <div className="flex flex-col items-center gap-6 rounded-xl border border-navy-600 bg-navy-800 p-8 w-96">
+          <button
+            onClick={() => setMode("menu")}
+            className="self-start text-xs text-navy-400 hover:text-navy-200"
+          >
+            &larr; Back
+          </button>
+
+          <label className="flex flex-col gap-2 w-full">
+            <span className="text-sm text-navy-200 uppercase tracking-wider">
+              Superintendents
+            </span>
+            <div className="flex gap-2">
+              {[2, 3, 4, 5, 6].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => updatePlayerCount(n)}
+                  className={cn(
+                    "flex-1 rounded-lg py-2 text-lg font-bold transition-colors",
+                    numPlayers === n
+                      ? "bg-amber-500 text-navy-900"
+                      : "bg-navy-700 text-navy-200 hover:bg-navy-600"
+                  )}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </label>
+
+          <div className="w-full space-y-2">
+            <span className="text-sm text-navy-200 uppercase tracking-wider">
+              Player Setup
+            </span>
+            {Array.from({ length: numPlayers }, (_, i) => String(i)).map(
+              (pid) => (
+                <div
+                  key={pid}
+                  className="flex items-center gap-2 rounded bg-navy-700 px-3 py-2"
+                >
+                  <span className="text-sm text-steel-100 w-16">
+                    Seat {parseInt(pid) + 1}
+                  </span>
+                  <select
+                    value={botSlots[pid] || "balanced"}
+                    onChange={(e) =>
+                      setBotSlots((prev) => ({
+                        ...prev,
+                        [pid]: e.target.value as BotStrategy | "human",
+                      }))
+                    }
+                    className="flex-1 rounded bg-navy-600 text-steel-100 text-sm px-2 py-1 border border-navy-500"
+                  >
+                    <option value="human">Human</option>
+                    {BOT_STRATEGIES.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        Bot: {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )
+            )}
+          </div>
+
+          <button
+            onClick={() => setMode("local-playing")}
+            className="w-full rounded-lg bg-amber-500 py-3 text-lg font-bold text-navy-900 hover:bg-amber-400 transition-colors"
+          >
+            LAUNCH OPERATIONS
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

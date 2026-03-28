@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  /* Naval/Industrial Base */
+  --color-navy-950: #0a0e1a;
+  --color-navy-900: #0f1729;
+  --color-navy-800: #162038;
+  --color-navy-700: #1e2d4a;
+  --color-navy-600: #2a3f66;
+  --color-navy-400: #4a6fa5;
+  --color-navy-200: #8baad4;
+
+  /* Steel/Chrome */
+  --color-steel-500: #6b7b8d;
+  --color-steel-300: #a8b8c8;
+  --color-steel-100: #dce4ec;
+
+  /* Status */
+  --color-amber-500: #f59e0b;
+  --color-amber-400: #fbbf24;
+  --color-alert-red: #ef4444;
+  --color-success: #22c55e;
+
+  /* Die Colors */
+  --color-die-red: #dc2626;
+  --color-die-blue: #2563eb;
+  --color-die-yellow: #eab308;
+  --color-die-green: #16a34a;
+  --color-die-gray: #6b7280;
+
+  /* Resources */
+  --color-funding: #fbbf24;
+  --color-material: #94a3b8;
+  --color-prestige: #a78bfa;
+}
+
+body {
+  background-color: var(--color-navy-950);
+  color: var(--color-steel-300);
+}
