@@ -4,7 +4,7 @@
   "description": "Drydock Masters - A semi-cooperative digital board game of shipyard management",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "test": "vitest run",
