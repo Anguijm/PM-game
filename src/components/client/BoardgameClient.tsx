@@ -95,9 +95,22 @@ export default function BoardgameClient({
         if (!state.isActive) { console.log(`[BOT] ${pid}: not active (CP=${state.ctx.currentPlayer} phase=${state.ctx.phase})`); continue; }
         if (state.ctx.gameover) { console.log(`[BOT] ${pid}: game over`); continue; }
 
-        // Use our own counter instead of numMoves (noLimit moves don't increment numMoves)
-        const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${botMoveCounter.current}`;
-        if (moveKey === lastBotMoveKey.current) { /* dedup */ continue; }
+        // Key based on game state — changes when a valid move is processed
+        const player = state.G.players[pid];
+        const actionsLeft = player?.actionsRemaining ?? 0;
+        const handSize = player?.hand?.length ?? 0;
+        const stateKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${actionsLeft}-${handSize}`;
+
+        // Stuck detection: same state key seen multiple times
+        if (stateKey === lastBotMoveKey.current) {
+          botFailCount.current++;
+          if (botFailCount.current > 5) {
+            try { client.moves.pass?.(); } catch {}
+            botFailCount.current = 0;
+            lastBotMoveKey.current = ""; // reset to allow next state
+          }
+          continue;
+        }
 
         const phase = state.ctx.phase || "event";
         const move = getBotMove(state.G, pid, botSlots[pid] as any, phase);
@@ -111,26 +124,14 @@ export default function BoardgameClient({
             fresh.ctx?.phase !== phase
           ) continue;
 
-          // Detect stuck bot — if counter hasn't changed, move is being rejected
-          if (moveKey === lastBotMoveKey.current) {
-            botFailCount.current++;
-            if (botFailCount.current > 3) {
-              // Force pass to unstick
-              try { client.moves.pass?.(); } catch {}
-              botFailCount.current = 0;
-            }
-            continue;
-          }
-
-          lastBotMoveKey.current = moveKey;
-          botMoveCounter.current++;
+          lastBotMoveKey.current = stateKey;
           botFailCount.current = 0;
           const moveFn = client.moves[move.move];
           if (moveFn) moveFn(...move.args);
           break;
         }
       }
-    }, 800);
+    }, 200);
 
     return () => clearInterval(interval);
   }, [botSlots]);
