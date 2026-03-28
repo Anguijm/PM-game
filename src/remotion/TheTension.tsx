@@ -20,10 +20,10 @@ const AMBER_500 = "#f59e0b";
 const ALERT_RED = "#ef4444";
 const SUCCESS = "#22c55e";
 
-const S1 = 10; // "SI is critical..."
-const S2 = 17; // "Do you spend..."
-const S3 = 9;  // "Semi-cooperative..."
-const TOTAL = S1 + S2 + S3; // 36s
+const S1 = 10; // "SI just dropped below ten..."
+const S2 = 14; // "You could clear the problem..."
+const S3 = 6;  // "Drydock Masters..."
+const TOTAL = S1 + S2 + S3; // 30s
 
 export const TheTension: React.FC = () => {
   const { fps } = useVideoConfig();
@@ -141,12 +141,12 @@ const Scene2Choice: React.FC = () => {
           transform: `scale(${1 + leftGlow * 0.05})`,
           boxShadow: leftGlow > 0.1 ? `0 0 40px rgba(96, 165, 250, 0.3)` : "none",
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🛡️</div>
+          <div style={{ fontSize: 40, fontWeight: 900, color: "#60a5fa", marginBottom: 8 }}>+2 SI</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: "#60a5fa" }}>
-            HELP THE TEAM
+            CLEAR THE PROBLEM
           </div>
           <div style={{ fontSize: 13, color: STEEL_300, marginTop: 12, lineHeight: 1.5 }}>
-            Sacrifice your turn to clear the persistent problem and save the shipyard
+            Earn Prestige, restore the yard. But you lose your turn.
           </div>
         </div>
 
@@ -167,12 +167,12 @@ const Scene2Choice: React.FC = () => {
           transform: `scale(${1 + rightGlow * 0.05})`,
           boxShadow: rightGlow > 0.1 ? `0 0 40px rgba(251, 191, 36, 0.3)` : "none",
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏅</div>
+          <div style={{ fontSize: 40, fontWeight: 900, color: AMBER_400, marginBottom: 8 }}>+8 PP</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: AMBER_400 }}>
-            CHASE GLORY
+            STAGE THE BIG JOB
           </div>
           <div style={{ fontSize: 13, color: STEEL_300, marginTop: 12, lineHeight: 1.5 }}>
-            Hoard your Prestige Points and risk the shipyard collapsing on everyone
+            Chase the promotion. Hope someone else deals with the fire.
           </div>
         </div>
       </div>
@@ -197,7 +197,7 @@ const Scene3Outro: React.FC = () => {
       <div style={{ textAlign: "center" }}>
         <h1 style={{
           fontSize: 88, fontWeight: 900, color: STEEL_100,
-          letterSpacing: "0.05em", opacity: titleReveal,
+          letterSpacing: "-0.02em", opacity: titleReveal,
           transform: `scale(${titleScale})`,
           textShadow: `0 0 60px ${AMBER_500}50`,
         }}>

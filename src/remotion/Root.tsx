@@ -17,7 +17,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="GameplayOverview"
         component={GameplayOverview}
-        durationInFrames={58 * 30} // 58 seconds
+        durationInFrames={55 * 30} // 55 seconds
         fps={30}
         width={1920}
         height={1080}
@@ -25,7 +25,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="TheTension"
         component={TheTension}
-        durationInFrames={36 * 30} // 36 seconds
+        durationInFrames={30 * 30} // 30 seconds
         fps={30}
         width={1920}
         height={1080}

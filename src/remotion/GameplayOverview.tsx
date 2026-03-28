@@ -27,12 +27,12 @@ const DIE_YELLOW = "#eab308";
 const DIE_GREEN = "#16a34a";
 const DIE_GRAY = "#6b7280";
 
-// Scene durations (seconds, from audio + padding)
-const S1 = 8; // "The fleet is damaged..."
-const S2 = 15; // "Take command..."
-const S3 = 23; // "You must work together..."
-const S4 = 12; // "Will you save..."
-const TOTAL = S1 + S2 + S3 + S4; // 58s
+// Scene durations (seconds, from audio + 1.5s padding)
+const S1 = 8;  // "You're a Shipyard Superintendent..."
+const S2 = 17; // "Assign your Labor Dice..."
+const S3 = 20; // "Here's where it gets interesting..."
+const S4 = 10; // "Two to six players..."
+const TOTAL = S1 + S2 + S3 + S4; // 55s
 
 export const GameplayOverview: React.FC = () => {
   const { fps } = useVideoConfig();
@@ -96,6 +96,9 @@ const Scene1Hook: React.FC = () => {
           DRYDOCK MASTERS
         </h1>
         <div style={{ width: 300, height: 3, backgroundColor: AMBER_500, marginTop: 16, borderRadius: 2 }} />
+        <p style={{ fontSize: 20, color: STEEL_300, marginTop: 16, letterSpacing: "0.1em" }}>
+          A Semi-Cooperative Shipyard Management Game
+        </p>
       </div>
     </AbsoluteFill>
   );
@@ -187,12 +190,12 @@ const Scene3SemiCoop: React.FC = () => {
           alignItems: "center", opacity: splitReveal,
           background: `linear-gradient(135deg, rgba(37,99,235,0.2) 0%, transparent 100%)`,
         }}>
-          <div style={{ fontSize: 72, marginBottom: 16 }}>🛡️</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "#60a5fa", letterSpacing: "0.1em" }}>
+          <div style={{ fontSize: 64, fontWeight: 900, color: "#60a5fa", marginBottom: 8 }}>SI</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#60a5fa", letterSpacing: "0.1em" }}>
             SHIPYARD INTEGRITY
           </div>
           <div style={{ fontSize: 14, color: STEEL_300, marginTop: 8, textAlign: "center", maxWidth: 300 }}>
-            Keep it above zero or everyone loses
+            Hits zero? Everyone's fired.
           </div>
         </div>
 
@@ -208,12 +211,12 @@ const Scene3SemiCoop: React.FC = () => {
           alignItems: "center", opacity: splitReveal,
           background: `linear-gradient(225deg, rgba(245,158,11,0.2) 0%, transparent 100%)`,
         }}>
-          <div style={{ fontSize: 72, marginBottom: 16 }}>🏅</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: AMBER_400, letterSpacing: "0.1em" }}>
+          <div style={{ fontSize: 64, fontWeight: 900, color: AMBER_400, marginBottom: 8 }}>PP</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: AMBER_400, letterSpacing: "0.1em" }}>
             PRESTIGE POINTS
           </div>
           <div style={{ fontSize: 14, color: STEEL_300, marginTop: 8, textAlign: "center", maxWidth: 300 }}>
-            Only the highest scorer wins
+            Top scorer gets promoted to Dock Master.
           </div>
         </div>
       </div>
