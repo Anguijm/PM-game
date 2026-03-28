@@ -44,6 +44,7 @@ export default function BoardgameClient({
         playerID,
         multiplayer: Local(),
         matchID: "drydock-local",
+        debug: false,
       });
 
       currentClients[playerID] = client;
@@ -83,17 +84,15 @@ export default function BoardgameClient({
       if (!state?.G || !state?.ctx) continue;
       if (state.ctx.gameover) continue;
 
-      // Check if bot is active: either currentPlayer or in activePlayers
-      const isInActivePlayers = state.ctx.activePlayers?.[pid] != null;
-      const isBotActive = state.ctx.currentPlayer === pid || isInActivePlayers;
-      if (!isBotActive) continue;
+      // Bot is active when it's their turn (currentPlayer matches)
+      if (state.ctx.currentPlayer !== pid) continue;
+      if (state.ctx.gameover) continue;
 
       const client = clientsRef.current[pid];
       if (!client) continue;
 
-      // Dedup guard using bot-specific key (handles activePlayers mode correctly)
-      const botStage = state.ctx.activePlayers?.[pid] || "default";
-      const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${botStage}`;
+      // Dedup guard
+      const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}`;
       if (moveKey === lastBotMoveKey.current) continue;
 
       const phase = state.ctx.phase || "event";
@@ -136,6 +135,7 @@ export default function BoardgameClient({
         activePlayerID={activePlayerID}
         currentTurnPlayerID={activeState.ctx.currentPlayer}
         onSwitch={setActivePlayerID}
+        botSlots={botSlots}
       />
 
       {/* Bot indicator */}

@@ -403,8 +403,11 @@ export function draftCard(
   const player = getPlayer(G, playerID);
   if (marketIndex < 0 || marketIndex >= G.workOrderMarket.length) return INVALID_MOVE;
 
+  if (G.playersDraftedThisRound.includes(playerID)) return INVALID_MOVE;
+
   const card = G.workOrderMarket.splice(marketIndex, 1)[0];
   player.hand.push(card);
+  G.playersDraftedThisRound.push(playerID);
 }
 
 // ============================================================

@@ -186,6 +186,7 @@ export function setupGame(ctx: { numPlayers: number; random?: { Shuffle: <T>(arr
 
     eventAcknowledged: false,
     resolutionAcknowledged: false,
+    playersDraftedThisRound: [],
 
     gameOver: false,
     collectiveGoalMet: false,

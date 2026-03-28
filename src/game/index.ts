@@ -124,26 +124,18 @@ export const DrydockMasters: Game<DrydockMastersState> = {
   setup: ({ ctx }) => setupGame(ctx),
 
   phases: {
-    // --- Phase 0: Contract Selection ---
-    // All players can select simultaneously (no turn rotation needed)
+    // --- Phase 0: Contract Selection (sequential turns) ---
     [GamePhase.ContractSelection]: {
       start: true,
       next: GamePhase.Event,
 
       moves: {
-        selectContract: { move: selectContract, noLimit: true },
+        selectContract: selectContract,
       },
 
       turn: {
-        // All players are active simultaneously — everyone picks their contract
-        activePlayers: { all: { stage: "contractSelection", moveLimit: 1 } },
-        stages: {
-          contractSelection: {
-            moves: {
-              selectContract: { move: selectContract, noLimit: true },
-            },
-          },
-        },
+        minMoves: 1,
+        maxMoves: 1,
       },
 
       endIf: ({ G }) => {
@@ -179,10 +171,6 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       endIf: ({ G }) => {
         return G.eventAcknowledged ? true : undefined;
       },
-
-      turn: {
-        activePlayers: undefined,
-      },
     },
 
     // --- Phase II: Planning (Draft) ---
@@ -190,6 +178,8 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       next: GamePhase.Action,
 
       onBegin: ({ G }) => {
+        G.playersDraftedThisRound = [];
+
         // Deck management at round 6
         if (G.round === 6) {
           G.workOrderDeck = [...G.workOrderDeck, ...G.workOrderDeckB];
@@ -205,10 +195,7 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
 
       moves: {
-        draftCard: {
-          move: draftCard,
-          noLimit: true,
-        },
+        draftCard: draftCard,
       },
 
       turn: {
@@ -218,8 +205,7 @@ export const DrydockMasters: Game<DrydockMastersState> = {
 
       endIf: ({ G, ctx }) => {
         // End when all players have drafted
-        // (boardgame.io handles turn rotation)
-        return undefined;
+        return G.playersDraftedThisRound.length >= ctx.numPlayers ? true : undefined;
       },
     },
 
@@ -256,13 +242,15 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
 
       turn: {
-        minMoves: 0,
-        maxMoves: undefined,
+        // Turn ends when the current player has passed
+        endIf: ({ G, ctx }) => {
+          const player = G.players[ctx.currentPlayer];
+          return player?.hasPassed === true;
+        },
       },
 
       endIf: ({ G }) => {
-        // End action phase when all players have explicitly passed
-        // (allows free actions and team actions after costed actions are spent)
+        // Phase ends when ALL players have passed
         const allPassed = Object.values(G.players).every(
           (p) => p.hasPassed
         );

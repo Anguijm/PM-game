@@ -316,9 +316,10 @@ export interface DrydockMastersState {
     expeditedShipping: boolean;
   };
 
-  // --- Phase pacing (UI acknowledgment) ---
+  // --- Phase pacing ---
   eventAcknowledged: boolean;
   resolutionAcknowledged: boolean;
+  playersDraftedThisRound: string[];
 
   // --- Game end ---
   gameOver: boolean;

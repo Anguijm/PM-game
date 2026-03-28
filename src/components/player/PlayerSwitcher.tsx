@@ -9,6 +9,7 @@ interface PlayerSwitcherProps {
   activePlayerID: string;
   currentTurnPlayerID: string;
   onSwitch: (playerID: string) => void;
+  botSlots?: Record<string, string>;
 }
 
 export function PlayerSwitcher({
@@ -16,20 +17,32 @@ export function PlayerSwitcher({
   activePlayerID,
   currentTurnPlayerID,
   onSwitch,
+  botSlots = {},
 }: PlayerSwitcherProps) {
   const [showPassDevice, setShowPassDevice] = useState(false);
   const [pendingPlayerID, setPendingPlayerID] = useState<string | null>(null);
 
-  // Auto-trigger Pass Device when turn changes and active view doesn't match
+  // Auto-trigger Pass Device when turn changes — but NOT for bot players
   useEffect(() => {
     if (currentTurnPlayerID !== activePlayerID && !showPassDevice) {
+      const isBot = botSlots[currentTurnPlayerID] && botSlots[currentTurnPlayerID] !== "human";
+      if (isBot) {
+        // Don't show Pass Device for bots — just let the bot play
+        return;
+      }
       setPendingPlayerID(currentTurnPlayerID);
       setShowPassDevice(true);
     }
-  }, [currentTurnPlayerID, activePlayerID, showPassDevice]);
+  }, [currentTurnPlayerID, activePlayerID, showPassDevice, botSlots]);
 
   function handleSwitch(pid: string) {
     if (pid === activePlayerID) return;
+    const isBot = botSlots[pid] && botSlots[pid] !== "human";
+    if (isBot) {
+      // Switch directly to bot view — no Pass Device needed
+      onSwitch(pid);
+      return;
+    }
     setPendingPlayerID(pid);
     setShowPassDevice(true);
   }
