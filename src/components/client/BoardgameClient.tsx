@@ -91,6 +91,7 @@ export default function BoardgameClient({
         const state = client.getState();
         if (!state?.G || !state?.ctx) continue;
         if (state.ctx.currentPlayer !== pid) continue;
+        if (!state.isActive) continue;
         if (state.ctx.gameover) continue;
 
         // Use our own counter instead of numMoves (noLimit moves don't increment numMoves)
