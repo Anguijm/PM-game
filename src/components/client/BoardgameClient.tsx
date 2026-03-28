@@ -102,6 +102,18 @@ export default function BoardgameClient({
         const move = getBotMove(state.G, pid, botSlots[pid] as any, phase);
 
         if (move) {
+          // Double-check with fresh state right before dispatching
+          const fresh = client.getState();
+          if (
+            !fresh?.isActive ||
+            fresh.ctx?.currentPlayer !== pid ||
+            fresh.ctx?.gameover ||
+            fresh.ctx?.phase !== phase
+          ) {
+            // State changed since we read it — skip this tick
+            continue;
+          }
+
           lastBotMoveKey.current = moveKey;
           botMoveCounter.current++;
           const moveFn = client.moves[move.move];
