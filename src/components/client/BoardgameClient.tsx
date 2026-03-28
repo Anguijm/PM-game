@@ -30,6 +30,7 @@ export default function BoardgameClient({
   >({});
   const clientsRef = useRef<Record<string, any>>({});
   const lastBotMoveKey = useRef<string>("");
+  const botMoveCounter = useRef(0);
   const clientStatesRef = useRef(clientStates);
 
   useEffect(() => {
@@ -80,27 +81,28 @@ export default function BoardgameClient({
   // React useEffect with clientStates dependency was unreliable — batching prevented re-triggers
   useEffect(() => {
     const interval = setInterval(() => {
-      const currentStates = clientStatesRef.current;
       for (const [pid] of Object.entries(botSlots)) {
         if (botSlots[pid] === "human") continue;
-
-        const state = currentStates[pid];
-        if (!state?.G || !state?.ctx) continue;
-        if (state.ctx.currentPlayer !== pid) continue;
-        if (state.ctx.gameover) continue;
 
         const client = clientsRef.current[pid];
         if (!client) continue;
 
-        const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${state.ctx.numMoves ?? 0}`;
+        // Read state directly from boardgame.io client (not React state — avoids staleness)
+        const state = client.getState();
+        if (!state?.G || !state?.ctx) continue;
+        if (state.ctx.currentPlayer !== pid) continue;
+        if (state.ctx.gameover) continue;
+
+        // Use our own counter instead of numMoves (noLimit moves don't increment numMoves)
+        const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${botMoveCounter.current}`;
         if (moveKey === lastBotMoveKey.current) continue;
 
         const phase = state.ctx.phase || "event";
         const move = getBotMove(state.G, pid, botSlots[pid] as any, phase);
 
         if (move) {
-          console.log(`[BOT] ${pid}: ${move.move} key=${moveKey}`);
           lastBotMoveKey.current = moveKey;
+          botMoveCounter.current++;
           const moveFn = client.moves[move.move];
           if (moveFn) moveFn(...move.args);
           break;

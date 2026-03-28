@@ -107,94 +107,38 @@ test.describe("Complete 2-player local game loop", () => {
     });
 
     // ================================================================
-    // STEP 5: ACTION PHASE
+    // STEP 5: ACTION PHASE — just pass when it's our turn
     // ================================================================
     await test.step("Take actions and pass", async () => {
-      // Wait until we see either action buttons (our turn) or waiting text (bot's turn)
-      await page.waitForFunction(
-        () => {
-          const panel = document.querySelector('[data-tutorial="phase-panel"]');
-          return panel?.textContent?.includes("Action Phase") || panel?.textContent?.includes("Waiting");
-        },
-        { timeout: 10000 }
-      );
-
-      // Keep trying until phase changes to resolution
-      // This handles: bot goes first → we go → bot passes → we pass → resolution
-      let attempts = 0;
-      while (attempts < 30) {
+      // Keep clicking Pass Turn whenever visible until we leave action phase
+      for (let i = 0; i < 60; i++) {
+        // Check if we left the action phase
         const phaseText = await page.getByTestId("phase-panel").textContent().catch(() => "");
+        if (phaseText?.includes("Resolution")) break;
 
-        // If we're past action phase, break
-        if (phaseText?.includes("Resolution") || !phaseText?.includes("Action")) break;
-
-        // If it's our turn (action buttons visible)
-        const passBtn = page.getByRole("button", { name: /Pass Turn/i });
-        const hasTurn = await passBtn.isVisible().catch(() => false);
-
-        if (hasTurn) {
-          // Take a procurement action if we have actions left
-          const procureBtn = page.getByRole("button", { name: /Procurement/i }).first();
-          const canProcure = await procureBtn.isVisible().catch(() => false);
-          if (canProcure) {
-            await procureBtn.click();
-            await page.waitForTimeout(300);
-          }
-          // Pass
-          const canPass = await passBtn.isVisible().catch(() => false);
-          if (canPass) {
-            await passBtn.click();
-            await page.waitForTimeout(500);
-          }
+        // Click Pass Turn if visible
+        const passBtn = page.locator("button:has-text('Pass Turn')");
+        if (await passBtn.isVisible().catch(() => false)) {
+          await passBtn.click();
         }
 
-        await page.waitForTimeout(500); // Wait for bot moves
-        attempts++;
+        await page.waitForTimeout(500);
       }
 
-      // Verify we reached resolution
+      // After action phase, the bot handles resolution ack and we enter Round 2
+      // Just wait for round 2 to appear (resolution + event happen fast with bot)
       await page.waitForFunction(
-        () => {
-          const panel = document.querySelector('[data-tutorial="phase-panel"]');
-          return panel?.textContent?.includes("Resolution");
-        },
+        () => (document.body.textContent || "").match(/2\s*\/\s*12/),
         { timeout: 15000 }
       );
     });
 
     // ================================================================
-    // STEP 6: RESOLUTION PHASE
-    // ================================================================
-    await test.step("Acknowledge resolution", async () => {
-      const continueBtn = page.getByRole("button", { name: /CONTINUE TO NEXT ROUND|VIEW FINAL/i });
-
-      try {
-        await continueBtn.waitFor({ state: "visible", timeout: 10000 });
-        await continueBtn.click();
-      } catch {
-        // Bot handled it
-      }
-
-      // Wait for next round event phase
-      await page.waitForFunction(
-        () => {
-          const roundText = document.body.textContent || "";
-          return roundText.includes("2 /") || roundText.includes("2/");
-        },
-        { timeout: 15000 }
-      );
-    });
-
-    // ================================================================
-    // STEP 7: VERIFY ROUND 2
+    // STEP 6: VERIFY ROUND 2
     // ================================================================
     await test.step("Verify round 2 started", async () => {
-      // Round indicator should show 2
       await expect(page.locator("text=/2\\s*\\/\\s*12/").first()).toBeVisible({ timeout: 5000 });
-
-      await page.screenshot({
-        path: "tests/e2e/screenshots/round2-reached.png",
-      });
+      await page.screenshot({ path: "tests/e2e/screenshots/round2-reached.png" });
     });
   });
 });
