@@ -127,7 +127,7 @@ export const DrydockMasters: Game<DrydockMastersState> = {
     // --- Phase 0: Contract Selection (sequential turns) ---
     [GamePhase.ContractSelection]: {
       start: true,
-      next: GamePhase.Event,
+      next: GamePhase.Planning,
 
       moves: {
         selectContract: selectContract,
@@ -144,40 +144,22 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
     },
 
-    // --- Phase I: Event ---
-    [GamePhase.Event]: {
-      next: GamePhase.Planning,
-
-      onBegin: ({ G }) => {
-        G.eventAcknowledged = false;
-
-        // Draw and resolve event
-        const deck = G.round <= 6 ? G.eventDeckI : G.eventDeckII;
-        const event = deck.pop();
-
-        if (event) {
-          G.activeEvent = event;
-          resolveEvent(G, event);
-        } else {
-          // No event to show — auto-acknowledge
-          G.eventAcknowledged = true;
-        }
-      },
-
-      moves: {
-        acknowledgeEvent: { move: acknowledgeEvent, noLimit: true },
-      },
-
-      endIf: ({ G }) => {
-        return G.eventAcknowledged ? true : undefined;
-      },
-    },
-
-    // --- Phase II: Planning (Draft) ---
+    // --- Event + Planning combined ---
+    // Event is resolved at the start of planning (no separate phase needed)
     [GamePhase.Planning]: {
       next: GamePhase.Action,
 
       onBegin: ({ G }) => {
+        // === Event logic (resolved at start of planning) ===
+        const deck = G.round <= 6 ? G.eventDeckI : G.eventDeckII;
+        const event = deck.pop();
+        if (event) {
+          G.activeEvent = event;
+          resolveEvent(G, event);
+        } else {
+          G.activeEvent = null;
+        }
+
         G.playersDraftedThisRound = [];
 
         // Deck management at round 6
@@ -204,7 +186,6 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
 
       endIf: ({ G, ctx }) => {
-        // End when all players have drafted
         return G.playersDraftedThisRound.length >= ctx.numPlayers ? true : undefined;
       },
     },
@@ -250,20 +231,26 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
 
       endIf: ({ G }) => {
-        // Phase ends when ALL players have passed
-        const allPassed = Object.values(G.players).every(
-          (p) => p.hasPassed
-        );
+        const allPassed = Object.values(G.players).every((p) => p.hasPassed);
         return allPassed ? true : undefined;
+      },
+
+      onEnd: ({ G }) => {
+        // Reset flags for next phases BEFORE they check endIf
+        // (boardgame.io checks endIf before onBegin!)
+        G.resolutionAcknowledged = false;
+        G.playersDraftedThisRound = [];
       },
     },
 
-    // --- Phase IV: Resolution ---
+    // --- Phase IV: Resolution (auto-processes, transitions to Planning) ---
     [GamePhase.Resolution]: {
-      next: GamePhase.Event,
+      next: GamePhase.Planning,
 
       onBegin: ({ G, random }) => {
+        // Reset flags for NEXT round's phases (endIf fires before onBegin!)
         G.resolutionAcknowledged = false;
+        G.playersDraftedThisRound = [];
 
         // Step 0: Persistent problem SI drain
         applyPersistentProblemDrain(G);
@@ -274,7 +261,7 @@ export const DrydockMasters: Game<DrydockMastersState> = {
         // Step 2: Countdown all dice
         countdownDice(G);
 
-        // Step 3: Check completions and run inspections (deterministic shuffle)
+        // Step 3: Check completions and run inspections
         resolveCompletions(G, random?.Shuffle);
 
         // Step 4: Milestone checks
@@ -287,8 +274,13 @@ export const DrydockMasters: Game<DrydockMastersState> = {
         cleanup(G);
       },
 
+      // 1-move acknowledge so phase doesn't auto-chain (boardgame.io limitation)
       moves: {
-        acknowledgeResolution: { move: acknowledgeResolution, noLimit: true },
+        acknowledgeResolution: acknowledgeResolution,
+      },
+
+      turn: {
+        maxMoves: 1,
       },
 
       endIf: ({ G }) => {

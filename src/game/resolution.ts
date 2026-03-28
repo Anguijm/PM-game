@@ -385,6 +385,10 @@ export function cleanup(G: DrydockMastersState) {
     expeditedShipping: false,
   };
 
+  // Note: eventAcknowledged and resolutionAcknowledged are reset in their
+  // respective phase onBegin hooks, NOT here. Resetting here causes a race
+  // condition where the bot acks between cleanup and the next onBegin.
+
   // Reset actions and pass state for all players
   for (const player of Object.values(G.players)) {
     player.actionsRemaining = GAME_CONSTANTS.ACTIONS_PER_TURN;

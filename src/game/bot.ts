@@ -85,7 +85,13 @@ export function getBotMove(
     }
 
     // Strategy-specific
-    const emptySlot = player.stagedSlots.findIndex((s) => s.card === null);
+    // Find empty slot (skip slot 3 if dock flooding active)
+    const hasDockFlooding = G.persistentProblems.some((p) => p.effect.special === "dockFlooding");
+    const emptySlot = player.stagedSlots.findIndex((s, i) => {
+      if (s.card !== null) return false;
+      if (hasDockFlooding && i === 3) return false; // locked by flooding
+      return true;
+    });
     const avail = getAvailableDice(player);
 
     switch (strategy) {
@@ -160,7 +166,13 @@ function getBestCard(
   player: PlayerState,
   mode: "high" | "cheap" | "any"
 ) {
-  const affordable = player.hand.filter((c) => c.materialCost <= player.material);
+  // Only consider cards we can actually afford AND haven't been staged already
+  const stagedCardIds = new Set(
+    player.stagedSlots.filter((s) => s.card).map((s) => s.card!.id)
+  );
+  const affordable = player.hand.filter(
+    (c) => c.materialCost <= player.material && !stagedCardIds.has(c.id)
+  );
   if (affordable.length === 0) return null;
   if (mode === "high") affordable.sort((a, b) => b.prestigeValue - a.prestigeValue);
   else if (mode === "cheap") affordable.sort((a, b) => a.materialCost - b.materialCost);

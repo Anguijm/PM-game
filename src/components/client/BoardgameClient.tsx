@@ -31,6 +31,7 @@ export default function BoardgameClient({
   const clientsRef = useRef<Record<string, any>>({});
   const lastBotMoveKey = useRef<string>("");
   const botMoveCounter = useRef(0);
+  const botFailCount = useRef(0);
   const clientStatesRef = useRef(clientStates);
 
   useEffect(() => {
@@ -89,39 +90,47 @@ export default function BoardgameClient({
 
         // Read state directly from boardgame.io client (not React state — avoids staleness)
         const state = client.getState();
-        if (!state?.G || !state?.ctx) continue;
-        if (state.ctx.currentPlayer !== pid) continue;
-        if (!state.isActive) continue;
-        if (state.ctx.gameover) continue;
+        if (!state?.G || !state?.ctx) { console.log(`[BOT] ${pid}: no state`); continue; }
+        if (state.ctx.currentPlayer !== pid) continue; // normal — not this bot's turn
+        if (!state.isActive) { console.log(`[BOT] ${pid}: not active (CP=${state.ctx.currentPlayer} phase=${state.ctx.phase})`); continue; }
+        if (state.ctx.gameover) { console.log(`[BOT] ${pid}: game over`); continue; }
 
         // Use our own counter instead of numMoves (noLimit moves don't increment numMoves)
         const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${botMoveCounter.current}`;
-        if (moveKey === lastBotMoveKey.current) continue;
+        if (moveKey === lastBotMoveKey.current) { /* dedup */ continue; }
 
         const phase = state.ctx.phase || "event";
         const move = getBotMove(state.G, pid, botSlots[pid] as any, phase);
 
         if (move) {
-          // Double-check with fresh state right before dispatching
           const fresh = client.getState();
           if (
             !fresh?.isActive ||
             fresh.ctx?.currentPlayer !== pid ||
             fresh.ctx?.gameover ||
             fresh.ctx?.phase !== phase
-          ) {
-            // State changed since we read it — skip this tick
+          ) continue;
+
+          // Detect stuck bot — if counter hasn't changed, move is being rejected
+          if (moveKey === lastBotMoveKey.current) {
+            botFailCount.current++;
+            if (botFailCount.current > 3) {
+              // Force pass to unstick
+              try { client.moves.pass?.(); } catch {}
+              botFailCount.current = 0;
+            }
             continue;
           }
 
           lastBotMoveKey.current = moveKey;
           botMoveCounter.current++;
+          botFailCount.current = 0;
           const moveFn = client.moves[move.move];
           if (moveFn) moveFn(...move.args);
           break;
         }
       }
-    }, 500);
+    }, 800);
 
     return () => clearInterval(interval);
   }, [botSlots]);
