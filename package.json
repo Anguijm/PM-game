@@ -9,7 +9,9 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "server": "tsx src/server.ts"
+    "server": "tsx src/server.ts",
+    "remotion:preview": "remotion preview src/remotion/index.ts",
+    "remotion:render": "remotion render src/remotion/index.ts DrydockTrailer public/marketing/trailer.mp4"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
   },
   "homepage": "https://github.com/Anguijm/PM-game#readme",
   "dependencies": {
+    "@remotion/cli": "^4.0.441",
+    "@remotion/renderer": "^4.0.441",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -34,6 +38,7 @@
     "postcss": "^8.5.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "remotion": "^4.0.441",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.5.0",
