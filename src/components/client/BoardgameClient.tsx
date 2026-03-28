@@ -81,14 +81,19 @@ export default function BoardgameClient({
       const strategy = botSlots[pid];
       if (!strategy || strategy === "human") continue;
       if (!state?.G || !state?.ctx) continue;
-      // Only act when truly active and game is not over
-      if (!state.isActive || state.ctx.gameover) continue;
+      if (state.ctx.gameover) continue;
+
+      // Check if bot is active: either currentPlayer or in activePlayers
+      const isInActivePlayers = state.ctx.activePlayers?.[pid] != null;
+      const isBotActive = state.ctx.currentPlayer === pid || isInActivePlayers;
+      if (!isBotActive) continue;
 
       const client = clientsRef.current[pid];
       if (!client) continue;
 
-      // Dedup guard: prevent dispatching the same move twice
-      const moveKey = `${state.ctx.currentPlayer}-${state.ctx.phase}-${state.ctx.numMoves ?? 0}-${state.ctx.turn ?? 0}`;
+      // Dedup guard using bot-specific key (handles activePlayers mode correctly)
+      const botStage = state.ctx.activePlayers?.[pid] || "default";
+      const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${botStage}`;
       if (moveKey === lastBotMoveKey.current) continue;
 
       const phase = state.ctx.phase || "event";
