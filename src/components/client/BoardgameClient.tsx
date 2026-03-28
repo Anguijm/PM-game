@@ -80,13 +80,16 @@ export default function BoardgameClient({
     for (const [pid, state] of Object.entries(clientStates)) {
       const strategy = botSlots[pid];
       if (!strategy || strategy === "human") continue;
-      if (!state?.isActive || !state?.G || !state?.ctx) continue;
+      if (!state?.G || !state?.ctx) continue;
+      // Check both isActive and currentPlayer — Local() transport can be inconsistent with isActive
+      const isBotTurn = state.isActive || state.ctx.currentPlayer === pid;
+      if (!isBotTurn) continue;
 
       const client = clientsRef.current[pid];
       if (!client) continue;
 
-      // Dedup guard: prevent dispatching the same move twice for the same state
-      const moveKey = `${state.ctx.currentPlayer}-${state.ctx.numMoves ?? 0}`;
+      // Dedup guard: prevent dispatching the same move twice
+      const moveKey = `${state.ctx.currentPlayer}-${state.ctx.phase}-${state.ctx.numMoves ?? 0}-${state.ctx.turn ?? 0}`;
       if (moveKey === lastBotMoveKey.current) continue;
 
       const phase = state.ctx.phase || "event";
