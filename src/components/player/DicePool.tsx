@@ -30,7 +30,7 @@ export function DicePool({ dice, playerID, isActive }: DicePoolProps) {
   }
 
   return (
-    <div className="rounded-lg border border-navy-600 bg-navy-800 p-3">
+    <div className="rounded-lg border border-navy-600 bg-navy-800 p-3" data-tutorial="dice-pool">
       <h3 className="text-xs text-navy-400 uppercase tracking-wider mb-2">
         Available Labor ({availableDice.length})
         {selectedDieID && (

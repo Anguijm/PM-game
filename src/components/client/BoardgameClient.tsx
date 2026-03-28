@@ -18,9 +18,11 @@ interface ClientState {
 export default function BoardgameClient({
   numPlayers,
   botSlots,
+  isTutorial = false,
 }: {
   numPlayers: number;
   botSlots: Record<string, BotStrategy | "human">;
+  isTutorial?: boolean;
 }) {
   const [activePlayerID, setActivePlayerID] = useState("0");
   const [clientStates, setClientStates] = useState<
@@ -143,6 +145,7 @@ export default function BoardgameClient({
         events={activeClient.events}
         isActive={activeState.isActive && !isViewingBot}
         playerID={activePlayerID}
+        isTutorial={isTutorial}
       />
     </div>
   );

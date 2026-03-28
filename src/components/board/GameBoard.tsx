@@ -14,6 +14,8 @@ import { OpponentSummary } from "@/components/player/OpponentSummary";
 import { MilestoneTracker } from "@/components/player/MilestoneTracker";
 import { GameUIProvider } from "@/hooks/useGameUI";
 import { useDiceMap } from "@/hooks/useDiceMap";
+import { TutorialProvider } from "@/hooks/useTutorial";
+import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
 
 interface GameBoardProps {
   G: DrydockMastersState;
@@ -22,6 +24,7 @@ interface GameBoardProps {
   events: Record<string, (...args: any[]) => void>;
   isActive: boolean;
   playerID: string;
+  isTutorial?: boolean;
 }
 
 export function GameBoard({
@@ -31,6 +34,7 @@ export function GameBoard({
   events,
   isActive,
   playerID,
+  isTutorial,
 }: GameBoardProps) {
   const player = G?.players?.[playerID];
   const phase = ctx?.phase || "event";
@@ -44,17 +48,20 @@ export function GameBoard({
   }
 
   return (
-    <GameUIProvider>
-      <GameBoardInner
-        G={G}
-        ctx={ctx}
-        moves={moves}
-        events={events}
-        isActive={isActive}
-        playerID={playerID}
-        phase={phase}
-      />
-    </GameUIProvider>
+    <TutorialProvider enabled={isTutorial ?? false}>
+      <GameUIProvider>
+        <GameBoardInner
+          G={G}
+          ctx={ctx}
+          moves={moves}
+          events={events}
+          isActive={isActive}
+          playerID={playerID}
+          phase={phase}
+        />
+        {isTutorial && <TutorialOverlay />}
+      </GameUIProvider>
+    </TutorialProvider>
   );
 }
 

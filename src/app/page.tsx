@@ -16,7 +16,7 @@ const OnlineClient = dynamic(
   { ssr: false }
 );
 
-type GameMode = "menu" | "local-setup" | "local-playing" | "online";
+type GameMode = "menu" | "tutorial" | "local-setup" | "local-playing" | "online";
 
 interface OnlineSession {
   matchID: string;
@@ -85,6 +85,17 @@ export default function Home() {
     setLoading(false);
   }
 
+  // Tutorial mode
+  if (mode === "tutorial") {
+    return (
+      <BoardgameClient
+        numPlayers={2}
+        botSlots={{ "0": "human", "1": "cautious" }}
+        isTutorial
+      />
+    );
+  }
+
   // Playing local
   if (mode === "local-playing") {
     return <BoardgameClient numPlayers={numPlayers} botSlots={botSlots} />;
@@ -115,6 +126,12 @@ export default function Home() {
 
       {mode === "menu" && (
         <div className="flex flex-col items-center gap-4 w-80">
+          <button
+            onClick={() => setMode("tutorial")}
+            className="w-full rounded-lg border-2 border-amber-500 bg-amber-500/10 py-3 text-lg font-bold text-amber-400 hover:bg-amber-500/20 transition-colors"
+          >
+            TUTORIAL — LEARN TO PLAY
+          </button>
           <button
             onClick={() => setMode("local-setup")}
             className="w-full rounded-lg bg-amber-500 py-3 text-lg font-bold text-navy-900 hover:bg-amber-400 transition-colors"

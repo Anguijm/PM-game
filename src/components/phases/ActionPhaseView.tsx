@@ -68,7 +68,7 @@ export function ActionPhaseView({
 
   return (
     <>
-      <div className="rounded-lg border border-success/30 bg-navy-800 p-4 space-y-3">
+      <div className="rounded-lg border border-success/30 bg-navy-800 p-4 space-y-3" data-tutorial="action-buttons">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-success uppercase tracking-wider">
             Action Phase — {player.actionsRemaining} action

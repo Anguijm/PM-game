@@ -29,7 +29,7 @@ export function HandPanel({ hand, isActive }: HandPanelProps) {
   }
 
   return (
-    <div className="rounded-lg border border-navy-600 bg-navy-800">
+    <div className="rounded-lg border border-navy-600 bg-navy-800" data-tutorial="hand-panel">
       <button
         type="button"
         onClick={() => setCollapsed(!collapsed)}

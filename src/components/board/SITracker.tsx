@@ -13,7 +13,7 @@ export function SITracker({ value }: SITrackerProps) {
   const pct = Math.max(0, (value / GAME_CONSTANTS.STARTING_SI) * 100);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" data-tutorial="si-tracker">
       <span className="text-xs text-navy-400 uppercase">SI</span>
       <div className="relative w-24 h-4 rounded-full bg-navy-700 overflow-hidden sm:w-32">
         {/* Threshold markers */}

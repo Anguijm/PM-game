@@ -47,7 +47,7 @@ export function ContractSelectionView({
         Side A is standard difficulty. Side B is complex with different dice and harder quotas.
       </p>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-tutorial="contract-choices">
         {player.contractChoices.map((contract) => (
           <ContractOption
             key={contract.id}
