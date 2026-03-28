@@ -81,9 +81,8 @@ export default function BoardgameClient({
       const strategy = botSlots[pid];
       if (!strategy || strategy === "human") continue;
       if (!state?.G || !state?.ctx) continue;
-      // Check both isActive and currentPlayer — Local() transport can be inconsistent with isActive
-      const isBotTurn = state.isActive || state.ctx.currentPlayer === pid;
-      if (!isBotTurn) continue;
+      // Only act when truly active and game is not over
+      if (!state.isActive || state.ctx.gameover) continue;
 
       const client = clientsRef.current[pid];
       if (!client) continue;

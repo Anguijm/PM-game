@@ -1,41 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTutorial } from "@/hooks/useTutorial";
-import { cn } from "@/lib/cn";
 
 export function TutorialOverlay() {
-  const { active, currentStep, advance, currentStepIndex, totalSteps } =
+  const { active, currentStep, advance, skipTutorial, currentStepIndex, totalSteps } =
     useTutorial();
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
 
-  // Find and measure the highlighted element
+  const updateHighlight = useCallback(() => {
+    if (!currentStep?.highlight) {
+      setHighlightRect(null);
+      return;
+    }
+    const el = document.querySelector(currentStep.highlight);
+    if (el) {
+      setHighlightRect(el.getBoundingClientRect());
+    } else {
+      setHighlightRect(null);
+    }
+  }, [currentStep]);
+
+  // Use MutationObserver + resize/scroll listeners instead of arbitrary timeouts
   useEffect(() => {
     if (!currentStep?.highlight) {
       setHighlightRect(null);
       return;
     }
 
-    const findElement = () => {
-      const el = document.querySelector(currentStep.highlight!);
-      if (el) {
-        setHighlightRect(el.getBoundingClientRect());
-      } else {
-        setHighlightRect(null);
-      }
-    };
+    updateHighlight();
 
-    // Retry a few times in case element hasn't mounted yet
-    findElement();
-    const timer = setTimeout(findElement, 300);
-    const timer2 = setTimeout(findElement, 800);
+    const observer = new MutationObserver(updateHighlight);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("resize", updateHighlight);
+    window.addEventListener("scroll", updateHighlight, true);
 
     return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
+      observer.disconnect();
+      window.removeEventListener("resize", updateHighlight);
+      window.removeEventListener("scroll", updateHighlight, true);
     };
-  }, [currentStep]);
+  }, [currentStep, updateHighlight]);
 
   if (!active || !currentStep) return null;
 
@@ -96,19 +102,27 @@ export function TutorialOverlay() {
 
             {/* Action bar */}
             <div className="flex items-center justify-between px-5 py-3 border-t border-navy-600">
-              <span className="text-xs text-navy-400">
-                {isManualAdvance
-                  ? "Click Next to continue"
-                  : `Perform the highlighted action to continue`}
-              </span>
-              {isManualAdvance && (
-                <button
-                  onClick={advance}
-                  className="rounded bg-amber-500 px-4 py-1.5 text-sm font-bold text-navy-900 hover:bg-amber-400 transition-colors"
-                >
-                  NEXT
-                </button>
-              )}
+              <button
+                onClick={skipTutorial}
+                className="text-xs text-navy-400 hover:text-navy-200 transition-colors"
+              >
+                Skip Tutorial
+              </button>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-navy-400">
+                  {isManualAdvance
+                    ? ""
+                    : "Perform the highlighted action"}
+                </span>
+                {isManualAdvance && (
+                  <button
+                    onClick={advance}
+                    className="rounded bg-amber-500 px-4 py-1.5 text-sm font-bold text-navy-900 hover:bg-amber-400 transition-colors"
+                  >
+                    NEXT
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>

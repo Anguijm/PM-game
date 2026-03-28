@@ -125,6 +125,7 @@ export const DrydockMasters: Game<DrydockMastersState> = {
 
   phases: {
     // --- Phase 0: Contract Selection ---
+    // All players can select simultaneously (no turn rotation needed)
     [GamePhase.ContractSelection]: {
       start: true,
       next: GamePhase.Event,
@@ -134,12 +135,18 @@ export const DrydockMasters: Game<DrydockMastersState> = {
       },
 
       turn: {
-        minMoves: 1,
-        maxMoves: 1,
+        // All players are active simultaneously — everyone picks their contract
+        activePlayers: { all: { stage: "contractSelection", moveLimit: 1 } },
+        stages: {
+          contractSelection: {
+            moves: {
+              selectContract: { move: selectContract, noLimit: true },
+            },
+          },
+        },
       },
 
       endIf: ({ G }) => {
-        // End when all players have chosen a contract
         const allChosen = Object.values(G.players).every((p) => p.contract !== null);
         return allChosen ? true : undefined;
       },

@@ -181,6 +181,7 @@ interface TutorialState {
   advance: () => void;
   advanceIfMove: (moveName: string) => void;
   isStepForPhase: (phase: string, round: number) => boolean;
+  skipTutorial: () => void;
 }
 
 const TutorialContext = createContext<TutorialState | null>(null);
@@ -193,10 +194,15 @@ export function TutorialProvider({
   enabled: boolean;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
+  const [skipped, setSkipped] = useState(false);
 
-  const currentStep = enabled && stepIndex < TUTORIAL_STEPS.length
+  const currentStep = enabled && !skipped && stepIndex < TUTORIAL_STEPS.length
     ? TUTORIAL_STEPS[stepIndex]
     : null;
+
+  const skipTutorial = useCallback(() => {
+    setSkipped(true);
+  }, []);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, TUTORIAL_STEPS.length));
@@ -222,15 +228,16 @@ export function TutorialProvider({
 
   const value = useMemo(
     () => ({
-      active: enabled && stepIndex < TUTORIAL_STEPS.length,
+      active: enabled && !skipped && stepIndex < TUTORIAL_STEPS.length,
       currentStepIndex: stepIndex,
       currentStep,
       totalSteps: TUTORIAL_STEPS.length,
       advance,
       advanceIfMove,
       isStepForPhase,
+      skipTutorial,
     }),
-    [enabled, stepIndex, currentStep, advance, advanceIfMove, isStepForPhase]
+    [enabled, skipped, stepIndex, currentStep, advance, advanceIfMove, isStepForPhase, skipTutorial]
   );
 
   return (
@@ -251,6 +258,7 @@ export function useTutorial(): TutorialState {
       advance: () => {},
       advanceIfMove: () => {},
       isStepForPhase: () => false,
+      skipTutorial: () => {},
     };
   }
   return ctx;
