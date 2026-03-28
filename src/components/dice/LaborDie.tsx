@@ -93,10 +93,10 @@ export function LaborRequirementSlot({
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
-      disabled={!onClick}
       className={cn(
         "flex h-8 w-8 items-center justify-center rounded text-xs font-bold border-2 border-dashed opacity-70 transition-all",
         onClick
@@ -111,6 +111,6 @@ export function LaborRequirementSlot({
       title={`Requires ${color} die, ${time} rounds`}
     >
       {time}
-    </button>
+    </div>
   );
 }

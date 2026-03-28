@@ -29,10 +29,10 @@ export function WorkOrderCard({
   const category = "category" in card ? card.category : undefined;
 
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      disabled={disabled || !onClick}
+    <motion.div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick && !disabled ? 0 : undefined}
+      onClick={onClick && !disabled ? onClick : undefined}
       whileHover={onClick && !disabled ? { y: -3 } : undefined}
       transition={{ duration: 0.15 }}
       className={`rounded-lg border text-left transition-all ${
@@ -95,6 +95,6 @@ export function WorkOrderCard({
           })}
         </div>
       )}
-    </motion.button>
+    </motion.div>
   );
 }
