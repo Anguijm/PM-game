@@ -15,8 +15,8 @@ test.describe("Complete 2-player local game loop", () => {
     await test.step("Load lobby and start local game", async () => {
       await page.goto("/");
       await expect(page.getByText("DRYDOCK MASTERS")).toBeVisible();
-      await page.getByText("LOCAL PLAY").click();
-      await expect(page.getByText("Superintendents")).toBeVisible();
+      await page.getByRole("button", { name: "LOCAL PLAY" }).click();
+      await expect(page.getByText("Superintendents")).toBeVisible({ timeout: 5000 });
       await page.getByText("LAUNCH OPERATIONS").click();
       await expect(
         page.getByRole("heading", { name: /Choose Your Ship Contract/i })

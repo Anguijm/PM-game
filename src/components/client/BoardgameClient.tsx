@@ -29,8 +29,8 @@ export default function BoardgameClient({
     Record<string, ClientState>
   >({});
   const clientsRef = useRef<Record<string, any>>({});
-  const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastBotMoveKey = useRef<string>("");
+  const clientStatesRef = useRef(clientStates);
 
   useEffect(() => {
     setClientStates({});
@@ -69,45 +69,47 @@ export default function BoardgameClient({
     return () => {
       Object.values(currentClients).forEach((c) => c.stop());
       clientsRef.current = {};
-      if (botTimerRef.current) clearTimeout(botTimerRef.current);
+      // cleanup handled by interval in bot effect
     };
   }, [numPlayers]);
 
-  // Bot auto-play: when a bot's turn comes up, execute moves after a short delay
+  // Keep ref in sync for the polling interval
+  clientStatesRef.current = clientStates;
+
+  // Bot auto-play: poll every 500ms for bot moves
+  // React useEffect with clientStates dependency was unreliable — batching prevented re-triggers
   useEffect(() => {
-    if (botTimerRef.current) clearTimeout(botTimerRef.current);
+    const interval = setInterval(() => {
+      const currentStates = clientStatesRef.current;
+      for (const [pid] of Object.entries(botSlots)) {
+        if (botSlots[pid] === "human") continue;
 
-    // Find any bot that is currently active
-    for (const [pid, state] of Object.entries(clientStates)) {
-      const strategy = botSlots[pid];
-      if (!strategy || strategy === "human") continue;
-      if (!state?.G || !state?.ctx) continue;
-      if (state.ctx.gameover) continue;
+        const state = currentStates[pid];
+        if (!state?.G || !state?.ctx) continue;
+        if (state.ctx.currentPlayer !== pid) continue;
+        if (state.ctx.gameover) continue;
 
-      // Bot is active when it's their turn (currentPlayer matches)
-      if (state.ctx.currentPlayer !== pid) continue;
-      if (state.ctx.gameover) continue;
+        const client = clientsRef.current[pid];
+        if (!client) continue;
 
-      const client = clientsRef.current[pid];
-      if (!client) continue;
+        const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}-${state.ctx.numMoves ?? 0}`;
+        if (moveKey === lastBotMoveKey.current) continue;
 
-      // Dedup guard
-      const moveKey = `${pid}-${state.ctx.turn ?? 0}-${state.ctx.phase}`;
-      if (moveKey === lastBotMoveKey.current) continue;
+        const phase = state.ctx.phase || "event";
+        const move = getBotMove(state.G, pid, botSlots[pid] as any, phase);
 
-      const phase = state.ctx.phase || "event";
-      const move = getBotMove(state.G, pid, strategy, phase);
-
-      if (move) {
-        lastBotMoveKey.current = moveKey;
-        botTimerRef.current = setTimeout(() => {
+        if (move) {
+          console.log(`[BOT] ${pid}: ${move.move} key=${moveKey}`);
+          lastBotMoveKey.current = moveKey;
           const moveFn = client.moves[move.move];
           if (moveFn) moveFn(...move.args);
-        }, 400);
-        break;
+          break;
+        }
       }
-    }
-  }, [clientStates, botSlots]);
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [botSlots]);
 
   // Find the first human player for initial view
   const firstHuman = Object.keys(botSlots).find(
