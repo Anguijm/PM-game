@@ -48,9 +48,9 @@ export function HandPanel({ hand, isActive }: HandPanelProps) {
 
       {!collapsed && (
         <div className="flex flex-wrap gap-2 px-3 pb-3">
-          {hand.map((card) => (
+          {hand.map((card, idx) => (
             <WorkOrderCard
-              key={card.id}
+              key={`${card.id}-${idx}`}
               card={card}
               size="compact"
               selected={selectedCardID === card.id}
