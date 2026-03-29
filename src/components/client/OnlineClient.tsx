@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Client } from "boardgame.io/client";
 import { SocketIO } from "boardgame.io/multiplayer";
 import { DrydockMasters } from "@/game";
 import { GameBoard } from "@/components/board/GameBoard";
+import { EmoteWheel, EmoteBubble } from "@/components/ui/EmoteWheel";
 import type { DrydockMastersState } from "@/game/types";
 import { getServerURL } from "@/lib/lobby";
 
@@ -31,6 +32,10 @@ export default function OnlineClient({
     isActive: false,
   });
   const clientRef = useRef<any>(null);
+  const [activeEmote, setActiveEmote] = useState<{ playerName: string; emoteId: string } | null>(null);
+  const lastChatCount = useRef<number | null>(null); // null = first load
+  const emoteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEmoteSent = useRef(0);
 
   useEffect(() => {
     const server = getServerURL();
@@ -50,6 +55,31 @@ export default function OnlineClient({
           ctx: s.ctx,
           isActive: s.isActive,
         });
+
+        // Check for new chat messages (emotes)
+        const msgs = s.chatMessages || [];
+
+        // First load: set baseline, don't trigger old emotes
+        if (lastChatCount.current === null) {
+          lastChatCount.current = msgs.length;
+        } else if (msgs.length > lastChatCount.current) {
+          // Process new messages since last check
+          const newMsgs = msgs.slice(lastChatCount.current);
+          for (const msg of newMsgs) {
+            const payload = msg?.payload;
+            if (payload && typeof payload === "object" && payload.type === "EMOTE") {
+              const senderName =
+                s.G?.players?.[msg.sender]?.name ||
+                `Player ${parseInt(msg.sender || "0") + 1}`;
+
+              // Clear previous timer to prevent race condition
+              if (emoteTimer.current) clearTimeout(emoteTimer.current);
+              setActiveEmote({ playerName: senderName, emoteId: payload.id });
+              emoteTimer.current = setTimeout(() => setActiveEmote(null), 3000);
+            }
+          }
+          lastChatCount.current = msgs.length;
+        }
       }
     });
 
@@ -99,6 +129,25 @@ export default function OnlineClient({
         isActive={state.isActive}
         playerID={playerID}
       />
+
+      {/* Emote system */}
+      <EmoteWheel
+        isOnline={true}
+        onSendEmote={(emoteId) => {
+          const now = Date.now();
+          if (now - lastEmoteSent.current < 2000) return; // 2s cooldown
+          lastEmoteSent.current = now;
+          activeClient.sendChatMessage({ type: "EMOTE", id: emoteId });
+        }}
+      />
+
+      {activeEmote && (
+        <EmoteBubble
+          playerName={activeEmote.playerName}
+          emoteId={activeEmote.emoteId}
+          onDone={() => setActiveEmote(null)}
+        />
+      )}
     </div>
   );
 }
