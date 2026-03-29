@@ -85,6 +85,11 @@ export function stageWork(
   player.hand.splice(cardIndex, 1);
   slot.card = card;
 
+  // Track Full House achievement
+  if (player.stagedSlots.every((s) => s.card !== null)) {
+    player.hadFullHouse = true;
+  }
+
   player.actionsRemaining--;
 }
 
@@ -331,6 +336,7 @@ export function trade(
   receiver.material -= requestMaterial;
 
   // No action cost — free action
+  sender.tradesCount++;
 }
 
 // ============================================================
@@ -363,7 +369,10 @@ export function emergencyOvertime(
 
   // Batch 3: PP reward for initiating team action
   const initiator = G.players[playerID];
-  if (initiator) initiator.pp += GAME_CONSTANTS.TEAM_ACTION_PP_BONUS;
+  if (initiator) {
+    initiator.pp += GAME_CONSTANTS.TEAM_ACTION_PP_BONUS;
+    initiator.teamActionsCount++;
+  }
 
   // Check for SI=0 game over
   if (G.shipyardIntegrity <= 0) {
@@ -384,6 +393,7 @@ export function expeditedShipping({ G, playerID }: MoveContext) {
 
   // Batch 3: PP reward for initiating team action
   player.pp += GAME_CONSTANTS.TEAM_ACTION_PP_BONUS;
+  player.teamActionsCount++;
 
   // Check for SI=0 game over
   if (G.shipyardIntegrity <= 0) {

@@ -18,6 +18,8 @@ import { useDiceMap } from "@/hooks/useDiceMap";
 import { TutorialProvider } from "@/hooks/useTutorial";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
 import { SoundProvider, useSoundFX } from "@/hooks/useSound";
+import { useAchievements } from "@/hooks/useAchievements";
+import { AchievementPopup } from "@/components/ui/AchievementPopup";
 import { VolumeControl } from "@/components/ui/VolumeControl";
 import { MobileNav, type MobileTab } from "@/components/ui/MobileNav";
 import { MobileHandDrawer } from "@/components/ui/MobileHandDrawer";
@@ -87,6 +89,8 @@ function GameBoardInner({
   const player = G.players[playerID];
   const [mobileTab, setMobileTab] = useState<MobileTab>("board");
   const { playSound } = useSoundFX();
+  const { newlyEarned, evaluate, dismissNewAchievements } = useAchievements();
+  const achievementsEvaluated = useRef(false);
 
   // Sound triggers based on state changes
   const prevPhase = useRef(phase);
@@ -126,8 +130,14 @@ function GameBoardInner({
     if (ctx.gameover) {
       if (ctx.gameover.allLose) playSound("defeat");
       else playSound("fanfare");
+
+      // Evaluate achievements once
+      if (!achievementsEvaluated.current) {
+        achievementsEvaluated.current = true;
+        evaluate(G, ctx.gameover, playerID);
+      }
     }
-  }, [G.round, G.shipyardIntegrity, phase, player.completedWork.length, ctx.gameover, playSound]);
+  }, [G.round, G.shipyardIntegrity, phase, player.completedWork.length, ctx.gameover, playSound, G, evaluate, playerID]);
 
   // Mobile: show/hide sections based on tab. Desktop: show all.
   const showBoard = mobileTab === "board";
@@ -221,6 +231,9 @@ function GameBoardInner({
 
       {/* Mobile bottom nav */}
       <MobileNav activeTab={mobileTab} onTabChange={setMobileTab} />
+
+      {/* Achievement popup */}
+      <AchievementPopup achievements={newlyEarned} onDismiss={dismissNewAchievements} />
 
       {/* Game Over */}
       {ctx.gameover && (

@@ -75,6 +75,9 @@ function createPlayer(playerID: string, diceColors: DieColor[]): PlayerState {
     problemsCleared: 0,
     growthWorksHit: 0,
     hasHadLowSI: false,
+    tradesCount: 0,
+    teamActionsCount: 0,
+    hadFullHouse: false,
   };
 }
 

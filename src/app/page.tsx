@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import { BOT_STRATEGIES, type BotStrategy } from "@/game/bot";
 import { createMatch, findMatch, joinMatch } from "@/lib/lobby";
 import { cn } from "@/lib/cn";
+import { useAchievements } from "@/hooks/useAchievements";
+import { AchievementGallery } from "@/components/ui/AchievementGallery";
 
 const BoardgameClient = dynamic(
   () => import("@/components/client/BoardgameClient"),
@@ -39,6 +41,8 @@ export default function Home() {
   const [playerName, setPlayerName] = useState("");
   const [onlineNumPlayers, setOnlineNumPlayers] = useState(2);
   const [error, setError] = useState("");
+  const [showAchievements, setShowAchievements] = useState(false);
+  const { earned, stats } = useAchievements();
   const [loading, setLoading] = useState(false);
   const [createdRoomCode, setCreatedRoomCode] = useState("");
 
@@ -144,9 +148,23 @@ export default function Home() {
           >
             ONLINE PLAY
           </button>
+          <button
+            onClick={() => setShowAchievements(true)}
+            className="text-xs text-navy-400 hover:text-amber-400 transition-colors"
+          >
+            Achievements ({Object.keys(earned).length}/15) | {stats.gamesPlayed} games played
+          </button>
           <p className="text-sm text-navy-600">
             Local: hot-seat with bots | Online: room codes
           </p>
+
+          {showAchievements && (
+            <AchievementGallery
+              earned={earned}
+              stats={stats}
+              onClose={() => setShowAchievements(false)}
+            />
+          )}
         </div>
       )}
 

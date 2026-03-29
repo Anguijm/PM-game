@@ -257,10 +257,13 @@ export interface PlayerState {
   hasPassed: boolean;
   /** Whether foreman freeCountdown ability has been used this round */
   foremanUsedThisRound: boolean;
-  /** Stats tracking for post-game badges */
+  /** Stats tracking for achievements + post-game badges */
   problemsCleared: number;
   growthWorksHit: number;
   hasHadLowSI: boolean;
+  tradesCount: number;
+  teamActionsCount: number;
+  hadFullHouse: boolean;
 }
 
 // --- CFR Bag ---
