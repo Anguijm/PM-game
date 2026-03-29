@@ -62,13 +62,13 @@ export function TopBar({
         )}
       </div>
 
-      {/* Admiral's Mandate */}
+      {/* Admiral's Mandate — truncated on mobile, full on desktop */}
       {admiralMandate && (
-        <div className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm">
+        <div className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs sm:text-sm">
           <span className="font-bold text-amber-400">
-            Admiral&apos;s Mandate:
+            Mandate:
           </span>{" "}
-          <span className="text-amber-400/80">
+          <span className="text-amber-400/80 line-clamp-1 sm:line-clamp-none">
             {admiralMandate.name} — {admiralMandate.description}
           </span>
         </div>

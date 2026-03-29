@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { DrydockMastersState } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
 import { TopBar } from "./TopBar";
@@ -16,6 +17,9 @@ import { GameUIProvider } from "@/hooks/useGameUI";
 import { useDiceMap } from "@/hooks/useDiceMap";
 import { TutorialProvider } from "@/hooks/useTutorial";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
+import { MobileNav, type MobileTab } from "@/components/ui/MobileNav";
+import { MobileHandDrawer } from "@/components/ui/MobileHandDrawer";
+import { MobileDiceBar } from "@/components/ui/MobileDiceBar";
 
 interface GameBoardProps {
   G: DrydockMastersState;
@@ -77,10 +81,16 @@ function GameBoardInner({
 }: GameBoardProps & { phase: string }) {
   const diceMap = useDiceMap(G.players);
   const player = G.players[playerID];
+  const [mobileTab, setMobileTab] = useState<MobileTab>("board");
+
+  // Mobile: show/hide sections based on tab. Desktop: show all.
+  const showBoard = mobileTab === "board";
+  const showMarket = mobileTab === "market";
+  const showInfo = mobileTab === "info";
 
   return (
-    <div className="flex-1 p-3 space-y-3 sm:p-4 sm:space-y-4">
-      {/* Top Bar */}
+    <div className="flex-1 p-3 space-y-3 sm:p-4 sm:space-y-4 pb-16 sm:pb-4">
+      {/* Top Bar — always visible */}
       <TopBar
         round={G.round}
         phase={phase}
@@ -91,10 +101,13 @@ function GameBoardInner({
         persistentProblems={G.persistentProblems}
       />
 
+      {/* Mobile: persistent dice/resource bar */}
+      <MobileDiceBar player={player} />
+
       {/* Action mode indicator */}
       {phase === "action" && isActive && <ActionModeBar />}
 
-      {/* Phase-specific panel */}
+      {/* Phase-specific panel — always visible */}
       <PhasePanel
         G={G}
         phase={phase}
@@ -103,50 +116,65 @@ function GameBoardInner({
         moves={moves}
       />
 
-      {/* Player Board (slots + resources + dice) */}
-      <PlayerBoard
-        player={player}
-        diceMap={diceMap}
-        isActive={isActive && phase === "action"}
-        moves={moves}
-      />
+      {/* === BOARD TAB (mobile) / always visible (desktop) === */}
+      <div className={showBoard ? "" : "hidden sm:block"}>
+        <PlayerBoard
+          player={player}
+          diceMap={diceMap}
+          isActive={isActive && phase === "action"}
+          moves={moves}
+        />
+      </div>
 
-      {/* Milestone Progress */}
-      <MilestoneTracker
-        player={player}
-        round={G.round}
-        numPlayers={Object.keys(G.players).length}
-        admiralMandate={G.admiralMandate}
-      />
+      {/* === INFO TAB (mobile) / always visible (desktop) === */}
+      <div className={showInfo ? "" : "hidden sm:block"}>
+        <MilestoneTracker
+          player={player}
+          round={G.round}
+          numPlayers={Object.keys(G.players).length}
+          admiralMandate={G.admiralMandate}
+        />
+        <div className="mt-3">
+          <OpponentSummary
+            players={G.players}
+            currentPlayerID={playerID}
+          />
+        </div>
+      </div>
 
-      {/* Hand (AWP) */}
-      <HandPanel
+      {/* Hand — desktop: normal panel. Mobile: collapsible drawer */}
+      <div className="hidden sm:block">
+        <HandPanel
+          hand={player.hand}
+          isActive={isActive && phase === "action"}
+        />
+      </div>
+      <MobileHandDrawer
         hand={player.hand}
         isActive={isActive && phase === "action"}
       />
 
-      {/* Opponents */}
-      <OpponentSummary
-        players={G.players}
-        currentPlayerID={playerID}
-      />
-
-      {/* Markets */}
-      <MarketPanel
-        workOrderMarket={G.workOrderMarket}
-        foremanMarket={G.foremanMarket}
-        isActive={isActive}
-        phase={phase}
-        onDraftCard={(i) => moves.draftCard?.(i)}
-        onHireForeman={(i) => moves.hireForeman?.(i)}
-        canAffordForeman={
-          player.funding >= GAME_CONSTANTS.FOREMAN_COST &&
-          player.foreman === null
-        }
-      />
+      {/* === MARKET TAB (mobile) / always visible (desktop) === */}
+      <div className={showMarket ? "" : "hidden sm:block"}>
+        <MarketPanel
+          workOrderMarket={G.workOrderMarket}
+          foremanMarket={G.foremanMarket}
+          isActive={isActive}
+          phase={phase}
+          onDraftCard={(i) => moves.draftCard?.(i)}
+          onHireForeman={(i) => moves.hireForeman?.(i)}
+          canAffordForeman={
+            player.funding >= GAME_CONSTANTS.FOREMAN_COST &&
+            player.foreman === null
+          }
+        />
+      </div>
 
       {/* Toast notifications */}
       <Toast />
+
+      {/* Mobile bottom nav */}
+      <MobileNav activeTab={mobileTab} onTabChange={setMobileTab} />
 
       {/* Game Over */}
       {ctx.gameover && (
