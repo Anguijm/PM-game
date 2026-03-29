@@ -4,6 +4,7 @@ import type { AdmiralMandateCard, EventCard } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
 import { PHASE_LABELS, getSIColor } from "@/lib/theme";
 import { SITracker } from "./SITracker";
+import { VolumeControl } from "@/components/ui/VolumeControl";
 
 interface TopBarProps {
   round: number;
@@ -55,11 +56,14 @@ export function TopBar({
         </div>
 
         {/* Active indicator */}
-        {isActive && (
-          <span className="ml-auto rounded bg-success/20 px-2 py-0.5 text-xs font-bold text-success uppercase">
-            Your Turn
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          <VolumeControl />
+          {isActive && (
+            <span className="rounded bg-success/20 px-2 py-0.5 text-xs font-bold text-success uppercase">
+              Your Turn
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Admiral's Mandate — truncated on mobile, full on desktop */}

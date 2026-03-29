@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { DrydockMastersState } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
 import { TopBar } from "./TopBar";
@@ -17,6 +17,8 @@ import { GameUIProvider } from "@/hooks/useGameUI";
 import { useDiceMap } from "@/hooks/useDiceMap";
 import { TutorialProvider } from "@/hooks/useTutorial";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
+import { SoundProvider, useSoundFX } from "@/hooks/useSound";
+import { VolumeControl } from "@/components/ui/VolumeControl";
 import { MobileNav, type MobileTab } from "@/components/ui/MobileNav";
 import { MobileHandDrawer } from "@/components/ui/MobileHandDrawer";
 import { MobileDiceBar } from "@/components/ui/MobileDiceBar";
@@ -52,8 +54,9 @@ export function GameBoard({
   }
 
   return (
-    <TutorialProvider enabled={isTutorial ?? false}>
-      <GameUIProvider>
+    <SoundProvider>
+      <TutorialProvider enabled={isTutorial ?? false}>
+        <GameUIProvider>
         <GameBoardInner
           G={G}
           ctx={ctx}
@@ -63,9 +66,10 @@ export function GameBoard({
           playerID={playerID}
           phase={phase}
         />
-        {isTutorial && <TutorialOverlay />}
-      </GameUIProvider>
-    </TutorialProvider>
+          {isTutorial && <TutorialOverlay />}
+        </GameUIProvider>
+      </TutorialProvider>
+    </SoundProvider>
   );
 }
 
@@ -82,6 +86,48 @@ function GameBoardInner({
   const diceMap = useDiceMap(G.players);
   const player = G.players[playerID];
   const [mobileTab, setMobileTab] = useState<MobileTab>("board");
+  const { playSound } = useSoundFX();
+
+  // Sound triggers based on state changes
+  const prevPhase = useRef(phase);
+  const prevRound = useRef(G.round);
+  const prevSI = useRef(G.shipyardIntegrity);
+  const prevCompletedCount = useRef(player.completedWork.length);
+  const lowSIPlayed = useRef(false);
+
+  useEffect(() => {
+    // Phase change sound
+    if (phase !== prevPhase.current) {
+      if (phase === "planning") playSound("whoosh"); // event revealed at planning start
+      prevPhase.current = phase;
+    }
+
+    // Round change
+    if (G.round !== prevRound.current) {
+      playSound("tick");
+      prevRound.current = G.round;
+    }
+
+    // Job completed
+    if (player.completedWork.length > prevCompletedCount.current) {
+      playSound("stamp");
+      prevCompletedCount.current = player.completedWork.length;
+    }
+
+    // SI alarm (once per threshold crossing)
+    if (G.shipyardIntegrity < 10 && prevSI.current >= 10 && !lowSIPlayed.current) {
+      playSound("alarm");
+      lowSIPlayed.current = true;
+    }
+    if (G.shipyardIntegrity >= 10) lowSIPlayed.current = false;
+    prevSI.current = G.shipyardIntegrity;
+
+    // Game over
+    if (ctx.gameover) {
+      if (ctx.gameover.allLose) playSound("defeat");
+      else playSound("fanfare");
+    }
+  }, [G.round, G.shipyardIntegrity, phase, player.completedWork.length, ctx.gameover, playSound]);
 
   // Mobile: show/hide sections based on tab. Desktop: show all.
   const showBoard = mobileTab === "board";
