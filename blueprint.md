@@ -1,84 +1,140 @@
 # Project Blueprint — Drydock Masters
 
-> This is the **single source of truth** for project state and priorities.
-> CLAUDE.md defines how you work. This file defines what you work on.
+> Single source of truth for project state and priorities.
 
 ## Architecture & Stack
 
-- **Framework:** Next.js 16 + Boardgame.io (game engine)
+- **Framework:** Next.js 16 (App Router, webpack) + Boardgame.io
 - **Language:** TypeScript (strict)
 - **Frontend:** React 19 + Tailwind CSS 4 + Framer Motion
-- **Testing:** Vitest + Testing Library
-- **Key Patterns:** Boardgame.io state machine (phases/turns/moves), immutable game state via move reducers
-- **Design System:** Naval/industrial theme — dark blues, steel grays, amber warnings
+- **Testing:** Vitest (63 unit tests) + Playwright (E2E, 10/10 complete games pass)
+- **Audio:** Procedurally generated WAV SFX + Gemini TTS voiceover
+- **Video:** Remotion (programmatic video rendering)
+- **Hosting:** Vercel (frontend) + Render (game server)
+- **Design:** Naval/industrial — dark navy, steel gray, amber accents
 
-## Game Overview
+## Live URLs
 
-**Drydock Masters** is a semi-cooperative logistics board game (2-6 players, 12 rounds).
-Players manage Labor Dice as countdown timers and limited drydock space to complete Work Orders.
-Shared Shipyard Integrity (SI) + Individual Prestige Points (PP) = semi-cooperative tension.
+- **Frontend:** https://pm-game-flame.vercel.app
+- **Game Server:** Render (pending start command fix: `npx tsx src/server.ts`)
+- **GitHub:** https://github.com/Anguijm/PM-game
 
-## Current P0s (Blockers)
+## Current Status: Tier 1 Complete — Deployed
 
-*(None)*
-
-## Active Sprint
-
-**Epic:** Foundation Build — Game Engine + UI MVP
-**Status:** COMPLETE
-**Goal:** Playable MVP with core game loop
-
-### Tasks
-- [x] Project initialization (Node/TS/React/Boardgame.io)
-- [x] TypeScript game state interfaces (types.ts)
-- [x] Core Boardgame.io game definition with 4 phases
-- [x] Player action move reducers (9 actions + free trades + team actions)
-- [x] Resolution phase logic (utilization, countdown, CFR inspection, milestones)
-- [x] Card data — MVP set (20 Phase A, 10 Phase B, 10 BAWP, 8 Growth, 8+8 Events, 6 Foreman, 6 Contracts, 5 Mandates)
-- [x] React UI — 22 components (GameBoard, DrydockSlot, WorkOrderCard, LaborDie, etc.)
-- [x] Boardgame.io client integration (local hot-seat multiplayer with Pass Device)
-- [x] Phase-specific views (Event, Planning draft, Action panel, Resolution summary)
-- [x] Trade modal + Coordinate flow + Team actions with die picker
-- [x] GameUIContext (action mode state machine, toast notifications)
-- [x] OpponentSummary + GameOver with score breakdown
+All core features built, balanced, tested, and deployed. Local play works. Online multiplayer pending game server fix.
 
 ## Tech Debt
 
-- CFR bag replenishment uses `Math.random()` — needs deterministic RNG (boardgame.io `ctx.random.Shuffle`) for multiplayer sync. Acceptable for local play.
+- Render start command needs `npx tsx` not `npm tsx`
+- Duplicate card IDs in hand (key warning fixed, root cause deferred)
+- CFR bag shuffle uses deterministic RNG in production (fixed)
 
-## Backlog (Prioritized)
+## Completed Work
 
-1. Online multiplayer via room codes (Boardgame.io lobby)
-2. ~~Event card special effects~~ — DONE: admiralVisit (+3 SI), igVisit (conditional ±3 SI), hurricaneWarning (-1 procurement), congressionalAudit (+$1 cross-train), dockFlooding (locks slot 4)
-3. ~~Foreman ability enforcement~~ — DONE: hullDiscount, electricianFreeWages, procurementBonus, crossTrainingDiscount, cfrRedraw, freeCountdown
-4. ~~Admiral's Mandate rule modifiers~~ — DONE: reducedProcurement, combatBonus, safetyFirst, acceleratedTimeline, openBooks (UI-only)
-5. ~~Card balance pass~~ — DONE: 26 batches, 2,600+ games. See BALANCE_REPORT.md
-6. Sound effects and polish animations (Framer Motion)
-7. ~~AI opponents~~ — DONE: 5 strategies (balanced, aggressive, cautious, rush, hoarder) selectable in lobby
-8. Side-B contract support
-9. ~~Milestone progress tracker UI~~ — DONE: shows contract name, 3 milestones, progress/needed/passed/failed
+### Game Engine
+- [x] 5-phase state machine: Contract Selection → Planning (incl. Event) → Action → Resolution → loop
+- [x] 13 moves: selectContract, draftCard, stageWork, assignLabor, procurement, coordinate, analyzeMarket, hireForeman, clearObstruction, trade, emergencyOvertime, expeditedShipping, pass
+- [x] Event special effects: admiralVisit, igVisit, hurricaneWarning, congressionalAudit, dockFlooding
+- [x] 6 foreman abilities: hullDiscount, electricianFreeWages, procurementBonus, crossTrainingDiscount, cfrRedraw, freeCountdown
+- [x] 5 admiral mandates: reducedProcurement, combatBonus, safetyFirst, acceleratedTimeline, openBooks
+- [x] Persistent problem SI drain (-1/round each)
+- [x] Growth work fail-forward (team -1 SI, player +2 PP, +$2)
+- [x] PP compression (scaled by player count)
+- [x] Cumulative milestone system with player-count scaling
+- [x] Deterministic RNG via boardgame.io random.Shuffle
+
+### Card Data
+- [x] 20 Phase A + 10 Phase B work orders
+- [x] 10 BAWP cards, 8 growth work cards
+- [x] 8+8 event cards (Deck I + II)
+- [x] 6 foreman cards, 6 ship contracts (3 Side-A, 3 Side-B), 5 admiral mandates
+
+### UI (30+ components)
+- [x] GameBoard, TopBar, SITracker, GameOver (with badges)
+- [x] PhasePanel, PlanningPhaseView, ActionPhaseView, ResolutionPhaseView
+- [x] ContractSelectionView
+- [x] PlayerBoard, DrydockSlot, DicePool, ResourceBar, HandPanel
+- [x] PlayerSwitcher (Pass Device for hot-seat)
+- [x] OpponentSummary, MilestoneTracker
+- [x] WorkOrderCard, EventCardDisplay, ForemanCard, LaborDie
+- [x] MarketPanel, TradeModal
+- [x] Toast, ActionModeBar, VolumeControl
+- [x] MobileNav, MobileHandDrawer, MobileDiceBar
+- [x] TutorialOverlay
+- [x] GameUIContext (action mode state machine)
+- [x] SoundProvider (10 procedural SFX)
+
+### Multiplayer & Bots
+- [x] Local hot-seat with Pass Device info hiding (skips bots)
+- [x] Online multiplayer via room codes (SocketIO)
+- [x] 5 AI bot strategies: balanced, aggressive, cautious, rush, hoarder
+- [x] Bot interval polling with stuck detection + force-pass
+- [x] Bot contract selection (aggressive → Side-B, others → Side-A)
+- [x] Bot milestone awareness (hoarder pivots to rush near deadlines)
+
+### Balance (3,400+ simulated games)
+- [x] 34 tuning batches with Gemini collaborative review
+- [x] 55% win rate (2P=53%, 3P=55%, 4P=60%)
+- [x] SI thresholds triggered in 37% of games
+- [x] 100 trades, 50 team actions, 185 obstructions cleared per 100 games
+- [x] PP compression, persistent problem drain, growth work compensation
+
+### Testing
+- [x] 63 Vitest unit tests (setup, moves, resolution)
+- [x] Playwright E2E: 10/10 complete games to conclusion (avg 27s each)
+- [x] Playwright mobile viewport test (375x812)
+- [x] Playtest batch simulation (100-game batches)
+- [x] Gemini code audits: 14+ rounds across engine + UI
+
+### Polish
+- [x] Framer Motion animations (dice countdown, phase transitions, card hover, game over, SI gauge spring)
+- [x] 10 procedurally generated sound effects (click, clunk, tick, chime, buzz, alarm, whoosh, stamp, fanfare, defeat)
+- [x] Volume control + mute toggle
+- [x] Mobile responsive (bottom nav, collapsible hand drawer, persistent dice bar, 2-col slots, safe area insets)
+- [x] Tutorial: 18-step guided walkthrough with "The Foreman" narrator + spotlight overlay
+- [x] Post-game stats: 6 superlative badges (Dock Master, Iron Will, Speed Runner, The Cleaner, Paper Pusher, Growth Survivor)
+- [x] Contract selection phase (Side A vs B choice)
+
+### Marketing
+- [x] Key art (4K, Gemini-generated)
+- [x] AI teaser video (8s, Gemini Veo)
+- [x] Remotion trailer (22s, game UI showcase)
+- [x] Gameplay Overview video (55s, Algenib voiceover, 4 scenes)
+- [x] The Tension video (30s, Gacrux voiceover, 3 scenes)
+- [x] All scripts Gemini creative-director approved (v2)
+
+### Deployment
+- [x] Vercel frontend config (vercel.json, webpack build)
+- [x] Render game server config (render.yaml, CORS)
+- [x] Environment variables (NEXT_PUBLIC_GAME_SERVER, FRONTEND_URL)
+- [x] Cold-start loading UI for Render free tier
+
+## Backlog — Tier 2 (Retention)
+
+| # | Item | Impact | Effort |
+|---|------|--------|--------|
+| 1 | Daily Challenge (global seed, fixed scenario, leaderboard) | High | Medium |
+| 2 | Accounts (Supabase — Google/Discord OAuth, guest play first) | High | Medium |
+| 3 | Emote/Ping wheel (6-8 pre-set phrases for online play) | Medium | Low |
+| 4 | Achievements (10+ trackable goals) | Medium | Medium |
+| 5 | Public lobby browser (boardgame.io lobby API) | High | Medium |
+
+## Backlog — Tier 3 (Expansion)
+
+| # | Item | Impact | Effort |
+|---|------|--------|--------|
+| 1 | Hidden per-player objectives (secret goals, paranoia) | High | Medium |
+| 2 | More cards + contracts (expand beyond MVP set) | Medium | Medium |
+| 3 | Steam release (Tauri wrapper + Steamworks) | High | High |
+| 4 | Analytics (PostHog — track tutorial dropoff, round engagement) | Medium | Low |
+| 5 | Cosmetic supporter pack ($4.99 — card backs, avatars) | Medium | Low |
+| 6 | Score timeline graph (per-round PP tracking) | Medium | Medium |
+| 7 | Async play (take turn, get notified) | High | High |
+| 8 | Tournament mode (8-player bracket) | Medium | High |
 
 ## Someday/Maybe
 
-- Persistent leaderboards / match history (PostgreSQL)
-- Spectator mode
-- Mobile-responsive layout
-- Tutorial / guided first game
-
-## Recently Completed
-
-### 2026-03-28 — Full UI MVP (6 phases, 6 Gemini audits)
-- **Feature:** 22 React components, Boardgame.io local multiplayer, hot-seat with Pass Device info hiding, GameUIContext action state machine, all 4 game phases interactive, trade modal, coordinate flow, team actions, opponent summary, game over with score breakdown
-- **Tests:** 63 passing (engine unchanged)
-- **Audit:** 6 rounds with Gemini (1 per phase). All CLEAR after fixes. Key fixes: React strict mode lifecycle, dice lookup O(1) map, toast race condition, stale action mode reset, Pass Device portal + opacity, coordinate player picker for 3+ players.
-- **Components:** GameBoard, TopBar, SITracker, GameOver, PhasePanel, EventPhaseView, PlanningPhaseView, ActionPhaseView, ResolutionPhaseView, PlayerBoard, DrydockSlot, DicePool, ResourceBar, HandPanel, PlayerSwitcher, OpponentSummary, WorkOrderCard, EventCardDisplay, ForemanCard, LaborDie, MarketPanel, Toast, ActionModeBar, TradeModal
-
-### 2026-03-28 — Gemini audit fixes (round 2)
-- **Fix:** 10 bugs/edge cases from Gemini audit: originalValue for PP distribution, pass move, CFR bag replenishment, utilization bonus vacuous truth, SI boundary checks, trade validation, emergencyOvertime clamping, hasPassed guards, nullish coalescing
-- **Tests:** 63 passing (setup + moves + resolution)
-- **Audit:** 2 rounds with Gemini. Round 2 CLEAR with minor advisory notes (deterministic RNG for multiplayer)
-
-### 2026-03-27 — Foundation engine build
-- **Feature:** Complete game engine with TypeScript types, Boardgame.io phases, all move reducers, resolution logic, and MVP card data
-- **Tests:** 13 passing (setup validation)
-- **Files:** `src/game/types.ts`, `setup.ts`, `moves.ts`, `resolution.ts`, `index.ts`, `src/data/cards.ts`
+- Spectator mode with commentary
+- Modding support (custom cards/events)
+- Campaign/legacy mode
+- Localization (i18n)
