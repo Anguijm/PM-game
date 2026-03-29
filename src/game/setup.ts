@@ -72,6 +72,9 @@ function createPlayer(playerID: string, diceColors: DieColor[]): PlayerState {
     hasPassed: false,
     foremanUsedThisRound: false,
     contractChoices: [],
+    problemsCleared: 0,
+    growthWorksHit: 0,
+    hasHadLowSI: false,
   };
 }
 

@@ -224,7 +224,7 @@ function GameBoardInner({
 
       {/* Game Over */}
       {ctx.gameover && (
-        <GameOver gameover={ctx.gameover} players={G.players} />
+        <GameOver gameover={ctx.gameover} players={G.players} round={G.round} shipyardIntegrity={G.shipyardIntegrity} />
       )}
     </div>
   );

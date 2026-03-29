@@ -24,6 +24,14 @@ export function applyPersistentProblemDrain(G: DrydockMastersState) {
   if (drainingProblems === 0) return;
   const drain = drainingProblems * GAME_CONSTANTS.PERSISTENT_PROBLEM_SI_DRAIN;
   G.shipyardIntegrity -= drain;
+
+  // Track if SI ever dropped below 10 (for "Iron Will" badge)
+  if (G.shipyardIntegrity < 10) {
+    for (const player of Object.values(G.players)) {
+      player.hasHadLowSI = true;
+    }
+  }
+
   if (G.shipyardIntegrity <= 0) {
     G.shipyardIntegrity = 0;
     G.gameOver = true;
@@ -154,6 +162,7 @@ export function resolveCompletions(G: DrydockMastersState, shuffleFn?: ShuffleFn
           player.completedWork.push(slot.card);
         } else {
           // Growth Work — fail-forward: team loses SI, player gets compensation
+          player.growthWorksHit++;
           player.pp = Math.max(0, player.pp - 1);
 
           // Shared pain: team loses SI (safetyFirst mandate: extra -1 SI)

@@ -283,6 +283,7 @@ export function clearObstruction(
     G.shipyardIntegrity + GAME_CONSTANTS.CLEAR_OBSTRUCTION_SI_BONUS
   );
   player.pp += GAME_CONSTANTS.CLEAR_OBSTRUCTION_PP_BONUS;
+  player.problemsCleared++;
 
   player.actionsRemaining--;
 }
