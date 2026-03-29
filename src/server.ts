@@ -1,23 +1,27 @@
 /**
  * Drydock Masters — Multiplayer Game Server
- * Runs on port 8001 alongside Next.js on port 3000.
- * Uses boardgame.io server with socket.io transport.
+ * Production: Render (persistent Node.js for WebSockets)
+ * Dev: localhost:8001
  */
 
 import { Server, Origins } from "boardgame.io/server";
 import { DrydockMasters } from "./game";
 
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+
 const server = Server({
   games: [DrydockMasters],
   origins: [
     Origins.LOCALHOST,
-    "http://localhost:3000",
-    "http://localhost:3001",
+    FRONTEND_URL,
+    // Allow Vercel preview deployments
+    /\.vercel\.app$/,
   ],
 });
 
-const PORT = Number(process.env.GAME_SERVER_PORT) || 8001;
+const PORT = Number(process.env.PORT) || 8001;
 
 server.run(PORT, () => {
   console.log(`Drydock Masters server running on port ${PORT}`);
+  console.log(`Accepting connections from: ${FRONTEND_URL}`);
 });

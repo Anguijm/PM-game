@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: drydock-masters-server
+    runtime: node
+    buildCommand: npm install && npx tsc --noEmit
+    startCommand: npx tsx src/server.ts
+    envVars:
+      - key: PORT
+        value: 8001
+      - key: FRONTEND_URL
+        sync: false  # Set manually to your Vercel URL

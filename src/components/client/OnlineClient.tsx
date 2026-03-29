@@ -67,10 +67,14 @@ export default function OnlineClient({
   if (!state.G || !state.ctx || !activeClient) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
+          <div className="h-8 w-8 mx-auto border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-navy-400 text-lg">Connecting to shipyard...</p>
           <p className="text-navy-600 text-sm">
             Match: {matchID} | You are Player {parseInt(playerID) + 1}
+          </p>
+          <p className="text-navy-600 text-xs mt-4">
+            Server may take up to 30 seconds to wake up on first connect.
           </p>
         </div>
       </div>
