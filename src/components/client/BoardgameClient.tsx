@@ -8,6 +8,7 @@ import { GameBoard } from "@/components/board/GameBoard";
 import { PlayerSwitcher } from "@/components/player/PlayerSwitcher";
 import type { DrydockMastersState } from "@/game/types";
 import { getBotMove, type BotStrategy } from "@/game/bot";
+import { trackEvent } from "@/app/providers";
 
 interface ClientState {
   G: DrydockMastersState | null;
@@ -67,6 +68,11 @@ export default function BoardgameClient({
     }
 
     clientsRef.current = currentClients;
+
+    // Track game start
+    const humanCount = Object.values(botSlots).filter((s) => s === "human").length;
+    const botCount = numPlayers - humanCount;
+    trackEvent("game_started", { mode: "local", numPlayers, humanCount, botCount, isTutorial });
 
     return () => {
       Object.values(currentClients).forEach((c) => c.stop());

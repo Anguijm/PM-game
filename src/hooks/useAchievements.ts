@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { DrydockMastersState, PlayerState } from "@/game/types";
+import type { DrydockMastersState } from "@/game/types";
+import { trackEvent } from "@/app/providers";
 import { GAME_CONSTANTS } from "@/game/types";
 
 export interface Achievement {
@@ -107,7 +108,10 @@ export function useAchievements() {
 
       saveData(stored);
       setData(stored);
-      if (earned.length > 0) setNewlyEarned(earned);
+      if (earned.length > 0) {
+        setNewlyEarned(earned);
+        earned.forEach((a) => trackEvent("achievement_earned", { id: a.id, name: a.name }));
+      }
     },
     []
   );

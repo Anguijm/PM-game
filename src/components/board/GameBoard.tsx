@@ -18,6 +18,7 @@ import { useDiceMap } from "@/hooks/useDiceMap";
 import { TutorialProvider } from "@/hooks/useTutorial";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
 import { SoundProvider, useSoundFX } from "@/hooks/useSound";
+import { trackEvent } from "@/app/providers";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementPopup } from "@/components/ui/AchievementPopup";
 import { VolumeControl } from "@/components/ui/VolumeControl";
@@ -131,10 +132,17 @@ function GameBoardInner({
       if (ctx.gameover.allLose) playSound("defeat");
       else playSound("fanfare");
 
-      // Evaluate achievements once
+      // Evaluate achievements + track analytics once
       if (!achievementsEvaluated.current) {
         achievementsEvaluated.current = true;
         evaluate(G, ctx.gameover, playerID);
+        trackEvent("game_completed", {
+          result: ctx.gameover.allLose ? "loss" : "win",
+          round: G.round,
+          si: G.shipyardIntegrity,
+          pp: player.pp,
+          jobsCompleted: player.completedWork.length,
+        });
       }
     }
   }, [G.round, G.shipyardIntegrity, phase, player.completedWork.length, ctx.gameover, playSound, G, evaluate, playerID]);
