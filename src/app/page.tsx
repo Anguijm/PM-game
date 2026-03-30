@@ -130,6 +130,12 @@ export default function Home() {
 
       {mode === "menu" && (
         <div className="flex flex-col items-center gap-4 w-80">
+          <a
+            href="/daily"
+            className="w-full rounded-lg bg-prestige py-3 text-lg font-bold text-navy-900 hover:bg-prestige/80 transition-colors block text-center"
+          >
+            DAILY CHALLENGE
+          </a>
           <button
             onClick={() => setMode("tutorial")}
             className="w-full rounded-lg border-2 border-amber-500 bg-amber-500/10 py-3 text-lg font-bold text-amber-400 hover:bg-amber-500/20 transition-colors"
