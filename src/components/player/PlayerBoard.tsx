@@ -6,6 +6,7 @@ import { ResourceBar } from "./ResourceBar";
 import { DicePool } from "./DicePool";
 import { DrydockSlot } from "./DrydockSlot";
 import { useGameUI } from "@/hooks/useGameUI";
+import { SecretObjectiveIndicator } from "@/components/ui/SecretObjectiveCard";
 
 interface PlayerBoardProps {
   player: PlayerState;
@@ -82,13 +83,18 @@ export function PlayerBoard({
 
   return (
     <div className="space-y-3">
-      <ResourceBar
-        funding={player.funding}
-        material={player.material}
-        pp={player.pp}
-        actionsRemaining={player.actionsRemaining}
-        hasPassed={player.hasPassed}
-      />
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex-1">
+          <ResourceBar
+            funding={player.funding}
+            material={player.material}
+            pp={player.pp}
+            actionsRemaining={player.actionsRemaining}
+            hasPassed={player.hasPassed}
+          />
+        </div>
+        <SecretObjectiveIndicator objectiveId={player.secretObjectiveId} />
+      </div>
 
       <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
         {player.stagedSlots.map((slot, i) => (

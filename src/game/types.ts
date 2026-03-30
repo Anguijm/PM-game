@@ -239,6 +239,8 @@ export interface PlayerState {
   actionsRemaining: number;
   /** The chosen Ship Contract */
   contract: ShipContractCard | null;
+  /** Secret objective (hidden from other players) */
+  secretObjectiveId: string | null;
   /** Two contracts to choose from during setup (cleared after selection) */
   contractChoices: ShipContractCard[];
   /** Hand of available work orders (AWP) */

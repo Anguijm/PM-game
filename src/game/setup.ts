@@ -12,6 +12,7 @@ import {
   GamePhase,
   GAME_CONSTANTS,
 } from "./types";
+import { SECRET_OBJECTIVES } from "../data/objectives";
 import {
   workOrdersPhaseA,
   workOrdersPhaseB,
@@ -63,6 +64,7 @@ function createPlayer(playerID: string, diceColors: DieColor[]): PlayerState {
     material: GAME_CONSTANTS.STARTING_MATERIAL,
     actionsRemaining: GAME_CONSTANTS.ACTIONS_PER_TURN,
     contract: null,
+    secretObjectiveId: null,
     hand: [],
     stagedSlots: createStagedSlots(),
     dice: createDice(playerID, diceColors),
@@ -152,6 +154,10 @@ export function setupGame(ctx: { numPlayers: number; random?: { Shuffle: <T>(arr
     while (players[playerID].contractChoices.length < 2 && shuffledContracts.length > 0) {
       players[playerID].contractChoices.push(shuffledContracts.pop()!);
     }
+
+    // Deal secret objective
+    const shuffledObjectives = rngShuffle([...SECRET_OBJECTIVES]);
+    players[playerID].secretObjectiveId = shuffledObjectives[i % shuffledObjectives.length].id;
   }
 
   return {

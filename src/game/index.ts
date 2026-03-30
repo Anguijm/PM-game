@@ -123,6 +123,20 @@ export const DrydockMasters: Game<DrydockMastersState> = {
 
   setup: ({ ctx }) => setupGame(ctx),
 
+  // Hide other players' secret objectives (reveal all on game over)
+  playerView: ({ G, playerID, ctx }) => {
+    if (ctx?.gameover) return G; // Post-game: reveal all objectives
+    if (!playerID) return G; // Spectator sees nothing hidden
+
+    const filtered = { ...G, players: { ...G.players } };
+    for (const [pid, player] of Object.entries(filtered.players)) {
+      if (pid !== playerID) {
+        filtered.players[pid] = { ...player, secretObjectiveId: null };
+      }
+    }
+    return filtered;
+  },
+
   phases: {
     // --- Phase 0: Contract Selection (sequential turns) ---
     [GamePhase.ContractSelection]: {

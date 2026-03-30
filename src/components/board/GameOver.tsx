@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { DrydockMastersState } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { SECRET_OBJECTIVES } from "@/data/objectives";
 
 interface GameOverProps {
   gameover: {
@@ -131,12 +132,24 @@ export function GameOver({ gameover, players, round, shipyardIntegrity }: GameOv
                   </div>
                   <span className="text-lg font-bold text-prestige">{score} PP</span>
                 </div>
-                <div className="mt-1 flex gap-3 text-[11px] text-navy-400">
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-navy-400">
                   <span>{player.pp} in-game</span>
                   {fundingBonus > 0 && <span className="text-funding">+{fundingBonus} funding</span>}
                   {materialBonus > 0 && <span className="text-material">+{materialBonus} material</span>}
                   <span>{player.completedWork.length} jobs</span>
                   {player.growthWorksHit > 0 && <span className="text-alert-red">{player.growthWorksHit} growth</span>}
+                  {(() => {
+                    if (!player.secretObjectiveId) return null;
+                    const obj = SECRET_OBJECTIVES.find((o) => o.id === player.secretObjectiveId);
+                    if (!obj) return null;
+                    const fakeG = { players, round, shipyardIntegrity } as any;
+                    const fulfilled = obj.check(player, fakeG, pid);
+                    return (
+                      <span className={fulfilled ? "text-prestige" : "text-navy-500"}>
+                        {fulfilled ? `+${obj.bonusPP}` : "✗"} {obj.name}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             );

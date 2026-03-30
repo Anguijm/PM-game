@@ -427,14 +427,26 @@ function checkAllContractsComplete(G: DrydockMastersState): boolean {
   return true;
 }
 
-/** Calculate final scores */
+/** Calculate final scores (includes secret objective bonus) */
 export function calculateFinalScores(G: DrydockMastersState): Record<string, number> {
+  // Import lazily to avoid circular dependency
+  const { SECRET_OBJECTIVES } = require("../data/objectives");
+
   const scores: Record<string, number> = {};
 
   for (const player of Object.values(G.players)) {
     let total = player.pp;
     total += Math.floor(player.funding / GAME_CONSTANTS.FINAL_FUNDING_PP_RATIO);
     total += Math.floor(player.material / GAME_CONSTANTS.FINAL_MATERIAL_PP_RATIO);
+
+    // Secret objective bonus
+    if (player.secretObjectiveId) {
+      const obj = SECRET_OBJECTIVES.find((o: any) => o.id === player.secretObjectiveId);
+      if (obj && obj.check(player, G, player.id)) {
+        total += obj.bonusPP;
+      }
+    }
+
     scores[player.id] = total;
   }
 
