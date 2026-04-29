@@ -16,7 +16,7 @@
 ## Live URLs
 
 - **Frontend:** https://pm-game-flame.vercel.app
-- **Game Server:** Render (pending start command fix: `npx tsx src/server.ts`)
+- **Game Server:** Render
 - **GitHub:** https://github.com/Anguijm/PM-game
 
 ## Current Status: Tier 1 Complete — Deployed
@@ -25,7 +25,6 @@ All core features built, balanced, tested, and deployed. Local play works. Onlin
 
 ## Tech Debt
 
-- Render start command needs `npx tsx` not `npm tsx`
 - Duplicate card IDs in hand (key warning fixed, root cause deferred)
 - CFR bag shuffle uses deterministic RNG in production (fixed)
 
