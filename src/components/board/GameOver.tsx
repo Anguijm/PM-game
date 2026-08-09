@@ -5,6 +5,7 @@ import type { DrydockMastersState } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { SECRET_OBJECTIVES } from "@/data/objectives";
+import { ScoreTimeline } from "@/components/ui/ScoreTimeline";
 
 interface GameOverProps {
   gameover: {
@@ -169,6 +170,9 @@ export function GameOver({ gameover, players, round, shipyardIntegrity }: GameOv
             </div>
           </div>
         )}
+
+        {/* Score Timeline */}
+        <ScoreTimeline players={players} shipyardIntegrity={shipyardIntegrity} />
 
         {/* Game Stats */}
         <div className="flex gap-4 text-xs text-navy-400 justify-center">

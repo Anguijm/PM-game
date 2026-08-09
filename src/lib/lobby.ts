@@ -4,6 +4,18 @@
 
 const GAME_NAME = "drydock-masters";
 
+/** Max age (ms) for a match to appear in the lobby browser */
+const STALE_MATCH_MS = 15 * 60 * 1000; // 15 minutes
+
+export interface LobbyMatch {
+  matchID: string;
+  roomCode: string;
+  players: string[]; // names of joined players
+  seatsOpen: number;
+  maxPlayers: number;
+  createdAt: number; // epoch ms
+}
+
 export function getServerURL(): string {
   if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_GAME_SERVER) {
     return process.env.NEXT_PUBLIC_GAME_SERVER;
@@ -23,7 +35,8 @@ export function generateRoomCode(): string {
 
 /** Create a new match on the server */
 export async function createMatch(
-  numPlayers: number
+  numPlayers: number,
+  isPublic: boolean = true
 ): Promise<{ matchID: string; roomCode: string }> {
   const server = getServerURL();
   const roomCode = generateRoomCode();
@@ -33,7 +46,7 @@ export async function createMatch(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       numPlayers,
-      setupData: { roomCode },
+      setupData: { roomCode, isPublic, createdAt: Date.now() },
     }),
   });
 
@@ -41,6 +54,45 @@ export async function createMatch(
   const data = await res.json();
 
   return { matchID: data.matchID, roomCode };
+}
+
+/** List open public matches available to join */
+export async function listOpenMatches(): Promise<LobbyMatch[]> {
+  const server = getServerURL();
+
+  const res = await fetch(`${server}/games/${GAME_NAME}?isGameover=false`);
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  const matches = data.matches || [];
+  const now = Date.now();
+
+  return matches
+    .filter((m: any) => {
+      // Must be public
+      if (m.setupData?.isPublic === false) return false;
+      // Must have open seats
+      const filledSeats = (m.players || []).filter((p: any) => p.name).length;
+      if (filledSeats >= (m.players?.length || 0)) return false;
+      // Filter stale matches (>15 min old or no timestamp)
+      const createdAt = m.setupData?.createdAt || m.createdAt;
+      if (!createdAt || now - createdAt > STALE_MATCH_MS) return false;
+      return true;
+    })
+    .map((m: any) => {
+      const playerNames = (m.players || [])
+        .filter((p: any) => p.name)
+        .map((p: any) => p.name);
+      return {
+        matchID: m.matchID,
+        roomCode: m.setupData?.roomCode || "???",
+        players: playerNames,
+        seatsOpen: (m.players?.length || 0) - playerNames.length,
+        maxPlayers: m.players?.length || 0,
+        createdAt: m.setupData?.createdAt || 0,
+      };
+    })
+    .sort((a: LobbyMatch, b: LobbyMatch) => b.createdAt - a.createdAt);
 }
 
 /** List available matches to find one by room code */

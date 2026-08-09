@@ -121,6 +121,57 @@ export const workOrdersPhaseA: WorkOrderCard[] = [
     materialCost: 2, laborRequirements: [{ color: DieColor.Blue, time: 2 }, { color: DieColor.Yellow, time: 1 }],
     prestigeValue: 3, isHighProfile: false, category: "engineering",
   },
+  // --- Expansion Phase A ---
+  {
+    id: "wo-a-021", type: CardType.WorkOrder, name: "Shaft Seal Replacement", phase: "A",
+    materialCost: 2, laborRequirements: [{ color: DieColor.Blue, time: 3 }],
+    prestigeValue: 4, isHighProfile: false, category: "propulsion",
+  },
+  {
+    id: "wo-a-022", type: CardType.WorkOrder, name: "Propeller Polishing", phase: "A",
+    materialCost: 1, laborRequirements: [{ color: DieColor.Gray, time: 2 }],
+    prestigeValue: 2, isHighProfile: false, category: "propulsion",
+  },
+  {
+    id: "wo-a-023", type: CardType.WorkOrder, name: "Main Reduction Gear Inspection", phase: "A",
+    materialCost: 1, laborRequirements: [{ color: DieColor.Blue, time: 2 }, { color: DieColor.Yellow, time: 2 }],
+    prestigeValue: 4, isHighProfile: false, category: "propulsion",
+  },
+  {
+    id: "wo-a-024", type: CardType.WorkOrder, name: "Deck Non-Skid Resurfacing", phase: "A",
+    materialCost: 1, laborRequirements: [{ color: DieColor.Red, time: 2 }, { color: DieColor.Gray, time: 1 }],
+    prestigeValue: 3, isHighProfile: false, category: "general",
+  },
+  {
+    id: "wo-a-025", type: CardType.WorkOrder, name: "VLS Cell Inspection", phase: "A",
+    materialCost: 2, laborRequirements: [{ color: DieColor.Green, time: 2 }, { color: DieColor.Yellow, time: 2 }],
+    prestigeValue: 4, isHighProfile: false, category: "combat",
+  },
+  {
+    id: "wo-a-026", type: CardType.WorkOrder, name: "Lube Oil Purifier Service", phase: "A",
+    materialCost: 2, laborRequirements: [{ color: DieColor.Blue, time: 2 }],
+    prestigeValue: 3, isHighProfile: false, category: "engineering",
+  },
+  {
+    id: "wo-a-027", type: CardType.WorkOrder, name: "Switchboard Calibration", phase: "A",
+    materialCost: 1, laborRequirements: [{ color: DieColor.Yellow, time: 2 }],
+    prestigeValue: 2, isHighProfile: false, category: "engineering",
+  },
+  {
+    id: "wo-a-028", type: CardType.WorkOrder, name: "Scaffolding Erection", phase: "A",
+    materialCost: 1, laborRequirements: [{ color: DieColor.Gray, time: 2 }, { color: DieColor.Gray, time: 2 }],
+    prestigeValue: 4, isHighProfile: false, category: "general",
+  },
+  {
+    id: "wo-a-029", type: CardType.WorkOrder, name: "Fire Pump Alignment", phase: "A",
+    materialCost: 2, laborRequirements: [{ color: DieColor.Blue, time: 2 }, { color: DieColor.Gray, time: 1 }],
+    prestigeValue: 4, isHighProfile: false, category: "engineering",
+  },
+  {
+    id: "wo-a-030", type: CardType.WorkOrder, name: "CIWS Ammo Feed Repair", phase: "A",
+    materialCost: 2, laborRequirements: [{ color: DieColor.Green, time: 3 }],
+    prestigeValue: 3, isHighProfile: false, category: "combat",
+  },
 ];
 
 // --- Work Orders: Phase B (Late game, harder jobs) ---
@@ -175,6 +226,32 @@ export const workOrdersPhaseB: WorkOrderCard[] = [
     id: "wo-b-010", type: CardType.WorkOrder, name: "Complete Power Conversion", phase: "B",
     materialCost: 5, laborRequirements: [{ color: DieColor.Yellow, time: 4 }, { color: DieColor.Blue, time: 4 }, { color: DieColor.Gray, time: 2 }],
     prestigeValue: 10, isHighProfile: true, category: "engineering",
+  },
+  // --- Expansion Phase B ---
+  {
+    id: "wo-b-011", type: CardType.WorkOrder, name: "Aegis Radar Array Replacement", phase: "B",
+    materialCost: 4, laborRequirements: [{ color: DieColor.Green, time: 4 }, { color: DieColor.Yellow, time: 3 }, { color: DieColor.Gray, time: 2 }],
+    prestigeValue: 9, isHighProfile: true, category: "combat",
+  },
+  {
+    id: "wo-b-012", type: CardType.WorkOrder, name: "Gas Turbine Engine Swap", phase: "B",
+    materialCost: 4, laborRequirements: [{ color: DieColor.Blue, time: 4 }, { color: DieColor.Blue, time: 3 }, { color: DieColor.Gray, time: 2 }],
+    prestigeValue: 8, isHighProfile: false, category: "propulsion",
+  },
+  {
+    id: "wo-b-013", type: CardType.WorkOrder, name: "Major Hull Plating Renewal", phase: "B",
+    materialCost: 3, laborRequirements: [{ color: DieColor.Red, time: 4 }, { color: DieColor.Red, time: 3 }, { color: DieColor.Blue, time: 2 }],
+    prestigeValue: 7, isHighProfile: false, category: "general",
+  },
+  {
+    id: "wo-b-014", type: CardType.WorkOrder, name: "Fiber Optic Network Upgrade", phase: "B",
+    materialCost: 3, laborRequirements: [{ color: DieColor.Yellow, time: 4 }, { color: DieColor.Yellow, time: 3 }],
+    prestigeValue: 7, isHighProfile: false, category: "engineering",
+  },
+  {
+    id: "wo-b-015", type: CardType.WorkOrder, name: "Caisson Gate Overhaul", phase: "B",
+    materialCost: 3, laborRequirements: [{ color: DieColor.Gray, time: 3 }, { color: DieColor.Red, time: 3 }],
+    prestigeValue: 6, isHighProfile: false, category: "general",
   },
 ];
 
@@ -329,6 +406,18 @@ export const eventCardsI: EventCard[] = [
     description: "Government confidence rises. SI +1, all players gain $1.",
     effect: { siChange: 1, fundingChange: 1 },
   },
+  {
+    id: "ev-i-009", type: CardType.Event, name: "Fleet Commander's Visit", deck: "I",
+    persistence: EventPersistence.Instant,
+    description: "Excellent initial inspection by Brass. SI +1, all players gain $2.",
+    effect: { siChange: 1, fundingChange: 2 },
+  },
+  {
+    id: "ev-i-010", type: CardType.Event, name: "Supply Chain Delay", deck: "I",
+    persistence: EventPersistence.Instant,
+    description: "Vendor shipment stuck in customs. All players lose 1 Material.",
+    effect: { materialChange: -1 },
+  },
 ];
 
 // --- Event Cards: Deck II (Rounds 7-12, can be persistent) ---
@@ -385,6 +474,19 @@ export const eventCardsII: EventCard[] = [
     description: "Emergency funding approved. All players gain $4.",
     effect: { fundingChange: 4 },
   },
+  {
+    id: "ev-ii-009", type: CardType.Event, name: "Asbestos Discovery", deck: "II",
+    persistence: EventPersistence.Persistent,
+    description: "Unexpected asbestos found in hull compartments. Drains SI until abated.",
+    effect: { siChange: -2 },
+    clearCost: { funding: 3, material: 2 },
+  },
+  {
+    id: "ev-ii-010", type: CardType.Event, name: "Experienced Riggers Arrive", deck: "II",
+    persistence: EventPersistence.Instant,
+    description: "Contract rigging crew boosts productivity. All players gain 2 Material.",
+    effect: { materialChange: 2 },
+  },
 ];
 
 // --- Foreman Upgrade Cards ---
@@ -419,6 +521,16 @@ export const foremanCards: ForemanCard[] = [
     id: "fm-006", type: CardType.Foreman, name: "Expeditor",
     description: "Once per round, reduce one of your assigned dice by 1 for free.",
     ability: "freeCountdown",
+  },
+  {
+    id: "fm-007", type: CardType.Foreman, name: "Quartermaster",
+    description: "Gain 1 Material back when completing any Phase B Work Order.",
+    ability: "materialRebate",
+  },
+  {
+    id: "fm-008", type: CardType.Foreman, name: "Rigging Master",
+    description: "Staging a Work Order costs 1 less Material (min 0).",
+    ability: "stagingDiscount",
   },
 ];
 
@@ -477,6 +589,25 @@ export const shipContracts: ShipContractCard[] = [
       round6: { quotas: { general: 1 } },
       round8: { quotas: { engineering: 1 } },
       round10: { quotas: { general: 2, engineering: 2, combat: 1, propulsion: 1 } },
+    },
+  },
+  // --- Expansion Contracts ---
+  {
+    id: "sc-007", type: CardType.ShipContract, name: "DDG-1000 Zumwalt", side: ContractSide.A,
+    startingDice: [DieColor.Yellow, DieColor.Yellow, DieColor.Blue, DieColor.Green, DieColor.Gray],
+    milestones: {
+      round6: { quotas: { engineering: 1 } },
+      round8: { quotas: { combat: 1, engineering: 1 } },
+      round10: { quotas: { engineering: 3, combat: 2, propulsion: 1 } },
+    },
+  },
+  {
+    id: "sc-008", type: CardType.ShipContract, name: "LCS-2 Independence", side: ContractSide.B,
+    startingDice: [DieColor.Red, DieColor.Blue, DieColor.Gray, DieColor.Gray, DieColor.Yellow],
+    milestones: {
+      round6: { quotas: { general: 1, propulsion: 1 } },
+      round8: { quotas: { engineering: 1 } },
+      round10: { quotas: { general: 2, propulsion: 2, engineering: 2, combat: 1 } },
     },
   },
 ];

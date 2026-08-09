@@ -266,6 +266,8 @@ export interface PlayerState {
   tradesCount: number;
   teamActionsCount: number;
   hadFullHouse: boolean;
+  /** Per-round PP + SI snapshots for score timeline graph */
+  history: { pp: number; si: number }[];
 }
 
 // --- CFR Bag ---
@@ -353,7 +355,7 @@ export const GAME_CONSTANTS = {
   STARTING_SI: 22,
   MAX_SI: 35,
   STARTING_FUNDING: 5,
-  STARTING_MATERIAL: 3,
+  STARTING_MATERIAL: 2,
   ACTIONS_PER_TURN: 2,
   STAGED_SLOTS: 4,
   BAWP_DEAL_COUNT: 3,
@@ -371,8 +373,8 @@ export const GAME_CONSTANTS = {
   MILESTONE_PENALTY_PP: 2,       // PP cost per missing job (was -3)
   HIGH_PROFILE_SI_BONUS: 1,
   HIGH_PROFILE_PP_BONUS: 1,
-  CFR_CLEAR_COUNT: 17,           // was 16 — 85/15 ratio
-  CFR_GROWTH_COUNT: 3,           // was 4 — less punishing
+  CFR_CLEAR_COUNT: 17,           // 85/15 ratio
+  CFR_GROWTH_COUNT: 3,           // balanced with expanded card set
   GROWTH_WORK_SI_PENALTY: -1,    // team loses SI on growth work draw
   GROWTH_WORK_PP_COMPENSATION: 2, // affected player gets PP (net +1 after -1 penalty)
   GROWTH_WORK_FUNDING_COMPENSATION: 2, // affected player gets funding

@@ -12,6 +12,7 @@ import {
   GamePhase,
 } from "./types";
 import { shuffle } from "./utils";
+import { SECRET_OBJECTIVES } from "../data/objectives";
 
 // ============================================================
 // Resolution Phase Logic
@@ -160,6 +161,15 @@ export function resolveCompletions(G: DrydockMastersState, shuffleFn?: ShuffleFn
           }
 
           player.completedWork.push(slot.card);
+
+          // Foreman: materialRebate — gain 1 Material on Phase B completion
+          if (
+            player.foreman?.ability === "materialRebate" &&
+            "phase" in slot.card &&
+            (slot.card as any).phase === "B"
+          ) {
+            player.material += 1;
+          }
         } else {
           // Growth Work — fail-forward: team loses SI, player gets compensation
           player.growthWorksHit++;
@@ -381,6 +391,11 @@ export function cleanup(G: DrydockMastersState) {
     return;
   }
 
+  // Record PP + SI snapshot for score timeline
+  for (const player of Object.values(G.players)) {
+    player.history.push({ pp: player.pp, si: G.shipyardIntegrity });
+  }
+
   // Advance round
   G.round++;
 
@@ -429,8 +444,6 @@ function checkAllContractsComplete(G: DrydockMastersState): boolean {
 
 /** Calculate final scores (includes secret objective bonus) */
 export function calculateFinalScores(G: DrydockMastersState): Record<string, number> {
-  // Import lazily to avoid circular dependency
-  const { SECRET_OBJECTIVES } = require("../data/objectives");
 
   const scores: Record<string, number> = {};
 

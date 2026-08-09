@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { BOT_STRATEGIES, type BotStrategy } from "@/game/bot";
-import { createMatch, findMatch, joinMatch } from "@/lib/lobby";
+import { createMatch, findMatch, joinMatch, listOpenMatches, type LobbyMatch } from "@/lib/lobby";
 import { cn } from "@/lib/cn";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementGallery } from "@/components/ui/AchievementGallery";
@@ -45,6 +45,9 @@ export default function Home() {
   const { earned, stats } = useAchievements();
   const [loading, setLoading] = useState(false);
   const [createdRoomCode, setCreatedRoomCode] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
+  const [openMatches, setOpenMatches] = useState<LobbyMatch[]>([]);
+  const [lobbyLoading, setLobbyLoading] = useState(false);
 
   function updatePlayerCount(n: number) {
     setNumPlayers(n);
@@ -55,11 +58,32 @@ export default function Home() {
     setBotSlots(newSlots);
   }
 
+  // Poll for open matches when in online setup mode
+  const refreshLobby = useCallback(async () => {
+    setLobbyLoading(true);
+    try {
+      const matches = await listOpenMatches();
+      setOpenMatches(matches);
+    } catch {
+      // silently fail — lobby is a nice-to-have
+    }
+    setLobbyLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "online" || onlineSession) return;
+    refreshLobby();
+    // Add jitter to prevent thundering herd
+    const jitter = Math.random() * 2000;
+    const interval = setInterval(refreshLobby, 10_000 + jitter);
+    return () => clearInterval(interval);
+  }, [mode, onlineSession, refreshLobby]);
+
   async function handleCreateRoom() {
     setError("");
     setLoading(true);
     try {
-      const { matchID, roomCode: code } = await createMatch(onlineNumPlayers);
+      const { matchID, roomCode: code } = await createMatch(onlineNumPlayers, isPublic);
       setCreatedRoomCode(code);
 
       // Auto-join as first player
@@ -67,6 +91,24 @@ export default function Home() {
       setOnlineSession({ ...session, matchID, roomCode: code });
     } catch (e: any) {
       setError(e.message || "Failed to create room");
+    }
+    setLoading(false);
+  }
+
+  async function handleLobbyJoin(matchID: string) {
+    setError("");
+    setLoading(true);
+    try {
+      const session = await joinMatch(matchID, playerName || "Player");
+      const match = openMatches.find((m) => m.matchID === matchID);
+      setOnlineSession({ ...session, matchID, roomCode: match?.roomCode || "" });
+    } catch (e: any) {
+      if (e.message?.includes("No open seats")) {
+        setError("Room filled up. Try another!");
+        refreshLobby(); // refresh list
+      } else {
+        setError(e.message || "Failed to join");
+      }
     }
     setLoading(false);
   }
@@ -161,7 +203,7 @@ export default function Home() {
             Achievements ({Object.keys(earned).length}/15) | {stats.gamesPlayed} games played
           </button>
           <p className="text-sm text-navy-600">
-            Local: hot-seat with bots | Online: room codes
+            Local: hot-seat with bots | Online: lobby + room codes
           </p>
 
           {showAchievements && (
@@ -197,6 +239,64 @@ export default function Home() {
             />
           </label>
 
+          {/* Open Games Lobby */}
+          <div className="w-full space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-navy-200 uppercase tracking-wider">
+                Open Games
+              </span>
+              <button
+                onClick={refreshLobby}
+                disabled={lobbyLoading}
+                className="text-[10px] text-navy-400 hover:text-navy-200 transition-colors"
+              >
+                {lobbyLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+            {openMatches.length === 0 ? (
+              <div className="rounded bg-navy-700/50 border border-navy-600 px-3 py-4 text-center text-xs text-navy-400">
+                No open games. Create one below!
+              </div>
+            ) : (
+              <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                {openMatches.map((m) => (
+                  <div
+                    key={m.matchID}
+                    className="flex items-center justify-between rounded bg-navy-700/50 border border-navy-600 px-3 py-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-amber-400 tracking-wider">
+                          {m.roomCode}
+                        </span>
+                        <span className="text-[10px] text-navy-400">
+                          {m.players.length}/{m.maxPlayers}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-navy-400 truncate">
+                        {m.players.join(", ") || "Waiting..."}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleLobbyJoin(m.matchID)}
+                      disabled={loading}
+                      className="ml-2 rounded bg-success px-3 py-1 text-xs font-bold text-navy-900 hover:bg-success/80 disabled:opacity-50 transition-colors shrink-0"
+                    >
+                      JOIN
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1 h-px bg-navy-600" />
+            <span className="text-xs text-navy-400">CREATE OR JOIN</span>
+            <div className="flex-1 h-px bg-navy-600" />
+          </div>
+
           {/* Create room */}
           <div className="w-full space-y-2">
             <span className="text-xs text-navy-200 uppercase tracking-wider">
@@ -218,6 +318,15 @@ export default function Home() {
                 </button>
               ))}
             </div>
+            <label className="flex items-center gap-2 text-xs text-navy-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="rounded border-navy-600 bg-navy-700 text-die-blue focus:ring-die-blue"
+              />
+              List in public lobby
+            </label>
             <button
               onClick={handleCreateRoom}
               disabled={loading}
@@ -238,15 +347,12 @@ export default function Home() {
           {/* Divider */}
           <div className="flex items-center gap-3 w-full">
             <div className="flex-1 h-px bg-navy-600" />
-            <span className="text-xs text-navy-400">OR</span>
+            <span className="text-xs text-navy-400">OR JOIN BY CODE</span>
             <div className="flex-1 h-px bg-navy-600" />
           </div>
 
-          {/* Join room */}
+          {/* Join room by code */}
           <div className="w-full space-y-2">
-            <span className="text-xs text-navy-200 uppercase tracking-wider">
-              Join a Room
-            </span>
             <input
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}

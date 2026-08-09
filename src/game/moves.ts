@@ -73,9 +73,12 @@ export function stageWork(
 
   const card = player.hand[cardIndex];
 
-  // Pay material cost (foreman: hullDiscount reduces hull work by 1M)
+  // Pay material cost (foreman discounts)
   let materialCost = card.materialCost;
   if (hasForeman(G, playerID, "hullDiscount") && card.laborRequirements.some((r) => r.color === DieColor.Red)) {
+    materialCost = Math.max(0, materialCost - 1);
+  }
+  if (hasForeman(G, playerID, "stagingDiscount")) {
     materialCost = Math.max(0, materialCost - 1);
   }
   if (player.material < materialCost) return INVALID_MOVE;

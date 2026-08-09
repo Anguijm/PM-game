@@ -11,8 +11,8 @@ describe("setupGame", () => {
   });
 
   it("sets starting SI based on player count", () => {
-    // 3 players: STARTING_SI + 14 = 22 + 14 = 36
-    expect(state.shipyardIntegrity).toBe(GAME_CONSTANTS.STARTING_SI + 14);
+    // 3 players: STARTING_SI + 6 = 22 + 6 = 28 (post-expansion tuning)
+    expect(state.shipyardIntegrity).toBe(28);
   });
 
   it("creates correct number of players", () => {

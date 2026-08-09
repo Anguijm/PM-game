@@ -170,8 +170,8 @@ describe("resolveCompletions", () => {
 
     // -1 PP penalty + 2 PP compensation = net +1
     expect(player.pp).toBe(6);
-    // Team loses SI
-    expect(G.shipyardIntegrity).toBeLessThan(GAME_CONSTANTS.STARTING_SI);
+    // Team loses SI (2P starts at 24 = STARTING_SI + 2)
+    expect(G.shipyardIntegrity).toBeLessThan(GAME_CONSTANTS.STARTING_SI + 2);
     // Player gets funding compensation
     expect(player.funding).toBeGreaterThan(GAME_CONSTANTS.STARTING_FUNDING);
     expect(G.growthWorkDeck.length).toBeLessThanOrEqual(growthDeckBefore);
@@ -334,6 +334,7 @@ describe("calculateFinalScores", () => {
     player.pp = 10;
     player.funding = 12; // +2 PP
     player.material = 7; // +2 PP
+    player.secretObjectiveId = null; // clear objective to test base scoring
 
     const scores = calculateFinalScores(G);
     expect(scores["0"]).toBe(10 + 2 + 2);

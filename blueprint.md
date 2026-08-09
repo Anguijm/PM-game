@@ -19,9 +19,9 @@
 - **Game Server:** Render (pending start command fix: `npx tsx src/server.ts`)
 - **GitHub:** https://github.com/Anguijm/PM-game
 
-## Current Status: Tier 1 Complete — Deployed
+## Current Status: Tier 2 Mostly Complete — Deployed
 
-All core features built, balanced, tested, and deployed. Local play works. Online multiplayer pending game server fix.
+All core features + most retention features built, balanced, tested, and deployed. Local play works. Online multiplayer via room codes. Daily Challenge, Achievements, Emote Wheel, Secret Objectives, and PostHog analytics all live.
 
 ## Tech Debt
 
@@ -109,28 +109,36 @@ All core features built, balanced, tested, and deployed. Local play works. Onlin
 - [x] Environment variables (NEXT_PUBLIC_GAME_SERVER, FRONTEND_URL)
 - [x] Cold-start loading UI for Render free tier
 
-## Backlog — Tier 2 (Retention)
+## Completed — Tier 2 (Retention)
+
+- [x] Daily Challenge (global seed, 1v3 bots, Vercel KV leaderboard, 7-day expiry, device dedup)
+- [x] Emote/Ping wheel (8 emotes, Socket.IO, online-only, 2s cooldown)
+- [x] Achievements (15 trackable goals, localStorage, gallery, popup notifications)
+- [x] Secret per-player objectives (14 objectives, +3-6 PP bonus, post-game reveal)
+- [x] PostHog analytics (integrated, achievement tracking active)
+
+## Backlog — Tier 2 (Remaining)
 
 | # | Item | Impact | Effort |
 |---|------|--------|--------|
-| 1 | Daily Challenge (global seed, fixed scenario, leaderboard) | High | Medium |
+| 1 | Public lobby browser (browsable room list, not just codes) | High | Medium |
 | 2 | Accounts (Supabase — Google/Discord OAuth, guest play first) | High | Medium |
-| 3 | Emote/Ping wheel (6-8 pre-set phrases for online play) | Medium | Low |
-| 4 | Achievements (10+ trackable goals) | Medium | Medium |
-| 5 | Public lobby browser (boardgame.io lobby API) | High | Medium |
+
+## Completed — Tier 3
+
+- [x] Card expansion: +10 Phase A, +5 Phase B work orders, +4 events, +2 foremen, +2 contracts (Gemini balance-audited)
+- [x] Score timeline graph: SVG line chart showing PP + SI per round at game over
+- [x] Fixed circular dependency in resolution.ts (require → import, all 63 tests pass)
 
 ## Backlog — Tier 3 (Expansion)
 
 | # | Item | Impact | Effort |
 |---|------|--------|--------|
-| 1 | Hidden per-player objectives (secret goals, paranoia) | High | Medium |
-| 2 | More cards + contracts (expand beyond MVP set) | Medium | Medium |
-| 3 | Steam release (Tauri wrapper + Steamworks) | High | High |
-| 4 | Analytics (PostHog — track tutorial dropoff, round engagement) | Medium | Low |
-| 5 | Cosmetic supporter pack ($4.99 — card backs, avatars) | Medium | Low |
-| 6 | Score timeline graph (per-round PP tracking) | Medium | Medium |
-| 7 | Async play (take turn, get notified) | High | High |
-| 8 | Tournament mode (8-player bracket) | Medium | High |
+| 2 | Score timeline graph (per-round PP tracking) | Medium | Medium |
+| 3 | Cosmetic supporter pack ($4.99 — card backs, avatars) | Medium | Low |
+| 4 | Steam release (Tauri wrapper + Steamworks) | High | High |
+| 5 | Async play (take turn, get notified) | High | High |
+| 6 | Tournament mode (8-player bracket) | Medium | High |
 
 ## Someday/Maybe
 

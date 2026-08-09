@@ -80,6 +80,7 @@ function createPlayer(playerID: string, diceColors: DieColor[]): PlayerState {
     tradesCount: 0,
     teamActionsCount: 0,
     hadFullHouse: false,
+    history: [],
   };
 }
 
@@ -165,7 +166,10 @@ export function setupGame(ctx: { numPlayers: number; random?: { Shuffle: <T>(arr
     phase: GamePhase.ContractSelection,
     // Scale SI with player count: more players = more events = more drain
     // 2P: 22, 3P: 36, 4P: 40
-    shipyardIntegrity: GAME_CONSTANTS.STARTING_SI + (numPlayers === 3 ? 14 : numPlayers >= 4 ? 18 : 0),
+    // Scale SI with player count: more players = more events but also more cards
+    // Post-expansion tuning: reduced bonuses to keep SI threatening
+    // Post-expansion tuning: 2P=24, 3P=28, 4P=26, 5P+=28
+    shipyardIntegrity: GAME_CONSTANTS.STARTING_SI + (numPlayers <= 2 ? 2 : numPlayers === 3 ? 6 : numPlayers === 4 ? 4 : 6),
     players,
 
     workOrderDeckA: shuffledWorkA,
