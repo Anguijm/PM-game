@@ -85,7 +85,7 @@ export function GameOver({ gameover, players, round, shipyardIntegrity }: GameOv
       transition={{ duration: 0.3 }}
     >
       <motion.div
-        className="rounded-xl border border-navy-600 bg-navy-800 p-6 max-w-lg w-full mx-4 space-y-5"
+        className="dm-panel p-6 max-w-lg w-full mx-4 space-y-5"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
@@ -93,12 +93,12 @@ export function GameOver({ gameover, players, round, shipyardIntegrity }: GameOv
         {/* Header */}
         {isLoss ? (
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-alert-red">SHIPYARD FAILURE</h2>
+            <h2 className="stencil text-2xl text-alert-red" style={{ textShadow: "0 0 12px rgba(239,68,68,0.5)" }}>SHIPYARD FAILURE</h2>
             <p className="mt-1 text-sm text-navy-200">SI reached zero. All superintendents relieved.</p>
           </div>
         ) : (
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-success">MISSION COMPLETE</h2>
+            <h2 className="stencil text-2xl text-success" style={{ textShadow: "0 0 12px rgba(34,197,94,0.5)" }}>MISSION COMPLETE</h2>
             {gameover.winner && (
               <p className="mt-1 text-base text-amber-400 font-bold">
                 Promoted: {Array.isArray(gameover.winner)
@@ -160,7 +160,7 @@ export function GameOver({ gameover, players, round, shipyardIntegrity }: GameOv
         {/* Badges */}
         {badges.length > 0 && (
           <div>
-            <h3 className="text-xs text-navy-400 uppercase tracking-wider mb-2">Awards</h3>
+            <h3 className="stencil text-xs text-navy-400 mb-2">Awards</h3>
             <div className="flex flex-wrap gap-2">
               {badges.map((badge, i) => (
                 <span key={i} className={cn("rounded-full px-3 py-1 text-xs font-bold", badge.color)}>

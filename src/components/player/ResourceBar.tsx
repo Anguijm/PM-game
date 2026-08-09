@@ -1,5 +1,8 @@
 "use client";
 
+import { Panel } from "@/components/ui/Panel";
+import { HudIcon, type HudIconName } from "@/components/ui/HudIcon";
+
 interface ResourceBarProps {
   funding: number;
   material: number;
@@ -16,37 +19,35 @@ export function ResourceBar({
   hasPassed,
 }: ResourceBarProps) {
   return (
-    <div className="flex flex-wrap gap-3 rounded-lg border border-navy-600 bg-navy-800 p-3 sm:gap-5">
-      <ResourceItem icon="$" color="text-funding" value={funding} label="Funding" />
-      <ResourceItem icon="&#9724;" color="text-material" value={material} label="Material" />
-      <ResourceItem icon="&#9733;" color="text-prestige" value={pp} label="Prestige" />
-      <div className="flex items-center gap-1.5">
+    <Panel className="flex flex-wrap items-center gap-4 p-3 sm:gap-6">
+      <ResourceItem icon="funding" value={funding} label="Funding" />
+      <ResourceItem icon="material" value={material} label="Material" />
+      <ResourceItem icon="prestige" value={pp} label="Prestige" />
+      <div className="ml-auto flex items-center gap-1.5">
         <span className="text-success font-bold">&#9654;</span>
-        <span className="text-steel-100 font-bold">{actionsRemaining}</span>
-        <span className="text-xs text-navy-400">
-          {hasPassed ? "(Passed)" : "Actions"}
+        <span className="text-lg font-bold text-steel-100">{actionsRemaining}</span>
+        <span className="stencil text-[10px] text-navy-400">
+          {hasPassed ? "Passed" : "Actions"}
         </span>
       </div>
-    </div>
+    </Panel>
   );
 }
 
 function ResourceItem({
   icon,
-  color,
   value,
   label,
 }: {
-  icon: string;
-  color: string;
+  icon: HudIconName;
   value: number;
   label: string;
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className={`${color} font-bold`}>{icon}</span>
-      <span className="text-steel-100 font-bold">{value}</span>
-      <span className="text-xs text-navy-400">{label}</span>
+      <HudIcon name={icon} size={18} title={label} />
+      <span className="text-lg font-bold text-steel-100">{value}</span>
+      <span className="stencil text-[10px] text-navy-400">{label}</span>
     </div>
   );
 }

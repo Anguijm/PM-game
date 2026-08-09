@@ -35,16 +35,16 @@ export function WorkOrderCard({
       onClick={onClick && !disabled ? onClick : undefined}
       whileHover={onClick && !disabled ? { y: -3 } : undefined}
       transition={{ duration: 0.15 }}
-      className={`rounded-lg border text-left transition-all ${
+      className={`text-left transition-all ${
         isCompact ? "px-3 py-2" : "p-3"
       } ${
         selected
-          ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500"
+          ? "rounded-lg border border-amber-500 bg-amber-500/10 ring-1 ring-amber-500"
           : disabled
-            ? "border-navy-600/50 bg-navy-800/50 opacity-50 cursor-not-allowed"
+            ? "dm-panel opacity-50 cursor-not-allowed"
             : onClick
-              ? "border-navy-600 bg-navy-800 hover:border-navy-400 hover:bg-navy-700 cursor-pointer"
-              : "border-navy-600 bg-navy-800 cursor-default"
+              ? "dm-panel hover:border-navy-400 cursor-pointer"
+              : "dm-panel cursor-default"
       }`}
     >
       {/* Header */}

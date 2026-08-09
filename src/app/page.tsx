@@ -160,12 +160,18 @@ export default function Home() {
 
   // Menu
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold text-steel-100 tracking-tight">
-          DRYDOCK MASTERS
-        </h1>
-        <p className="mt-2 text-navy-400 text-lg">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-8">
+      <div className="w-full max-w-2xl text-center">
+        {/* Key art — the game's own brand hero (title baked in) */}
+        <div className="overflow-hidden rounded-xl border border-navy-600 shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/marketing/key-art.jpg"
+            alt="Drydock Masters"
+            className="w-full"
+          />
+        </div>
+        <p className="stencil mt-3 text-xs text-navy-400 sm:text-sm">
           Regional Maintenance Center — Shipyard Operations
         </p>
       </div>

@@ -2,8 +2,9 @@
 
 import type { AdmiralMandateCard, EventCard } from "@/game/types";
 import { GAME_CONSTANTS } from "@/game/types";
-import { PHASE_LABELS, getSIColor } from "@/lib/theme";
-import { SITracker } from "./SITracker";
+import { PHASE_LABELS } from "@/lib/theme";
+import { SIGauge } from "./SIGauge";
+import { Panel } from "@/components/ui/Panel";
 import { VolumeControl } from "@/components/ui/VolumeControl";
 
 interface TopBarProps {
@@ -29,10 +30,10 @@ export function TopBar({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-navy-600 bg-navy-800 p-3 sm:gap-5">
+      <Panel className="flex flex-wrap items-center gap-4 p-3 sm:gap-6">
         {/* Round */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-navy-400 uppercase">Round</span>
+          <span className="stencil text-[10px] text-navy-400">Round</span>
           <span className="text-xl font-bold text-steel-100">
             {round}/{GAME_CONSTANTS.MAX_ROUNDS}
           </span>
@@ -40,18 +41,18 @@ export function TopBar({
 
         {/* Phase */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-navy-400 uppercase">Phase</span>
-          <span className={`text-sm font-bold ${phaseInfo.color}`}>
+          <span className="stencil text-[10px] text-navy-400">Phase</span>
+          <span className={`stencil text-sm ${phaseInfo.color}`}>
             {phaseInfo.label}
           </span>
         </div>
 
-        {/* SI */}
-        <SITracker value={shipyardIntegrity} />
+        {/* SI gauge — the signature device */}
+        <SIGauge value={shipyardIntegrity} size={116} />
 
         {/* Turn */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-navy-400 uppercase">Turn</span>
+          <span className="stencil text-[10px] text-navy-400">Turn</span>
           <span className="text-sm text-steel-100">{currentPlayerLabel}</span>
         </div>
 
@@ -59,12 +60,12 @@ export function TopBar({
         <div className="ml-auto flex items-center gap-3">
           <VolumeControl />
           {isActive && (
-            <span className="rounded bg-success/20 px-2 py-0.5 text-xs font-bold text-success uppercase">
+            <span className="stencil rounded bg-success/20 px-2 py-0.5 text-xs text-success">
               Your Turn
             </span>
           )}
         </div>
-      </div>
+      </Panel>
 
       {/* Admiral's Mandate — truncated on mobile, full on desktop */}
       {admiralMandate && (
