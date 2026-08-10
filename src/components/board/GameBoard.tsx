@@ -9,6 +9,7 @@ import { HandPanel } from "@/components/player/HandPanel";
 import { MarketPanel } from "@/components/market/MarketPanel";
 import { PhasePanel } from "@/components/phases/PhasePanel";
 import { ActionModeBar } from "@/components/ui/ActionModeBar";
+import { PhasePrompt } from "@/components/ui/PhasePrompt";
 import { Toast } from "@/components/ui/Toast";
 import { GameOver } from "./GameOver";
 import { OpponentSummary } from "@/components/player/OpponentSummary";
@@ -164,6 +165,11 @@ function GameBoardInner({
         admiralMandate={G.admiralMandate}
         persistentProblems={G.persistentProblems}
       />
+
+      {/* What to do now — plain-English guidance for the current phase */}
+      {!ctx.gameover && (
+        <PhasePrompt phase={phase} isActive={isActive} player={player} />
+      )}
 
       {/* Mobile: persistent dice/resource bar */}
       <MobileDiceBar player={player} />

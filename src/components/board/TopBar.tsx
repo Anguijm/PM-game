@@ -5,6 +5,7 @@ import { GAME_CONSTANTS } from "@/game/types";
 import { PHASE_LABELS } from "@/lib/theme";
 import { SIGauge } from "./SIGauge";
 import { Panel } from "@/components/ui/Panel";
+import { HelpButton } from "@/components/ui/RulesReference";
 import { VolumeControl } from "@/components/ui/VolumeControl";
 
 interface TopBarProps {
@@ -58,6 +59,7 @@ export function TopBar({
 
         {/* Active indicator */}
         <div className="ml-auto flex items-center gap-3">
+          <HelpButton />
           <VolumeControl />
           {isActive && (
             <span className="stencil rounded bg-success/20 px-2 py-0.5 text-xs text-success">

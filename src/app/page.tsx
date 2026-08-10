@@ -42,7 +42,19 @@ export default function Home() {
   const [onlineNumPlayers, setOnlineNumPlayers] = useState(2);
   const [error, setError] = useState("");
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const { earned, stats } = useAchievements();
+
+  // First-time visitors: nudge them toward the tutorial.
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("dm_seen_intro")) {
+      setShowIntro(true);
+    }
+  }, []);
+  function dismissIntro() {
+    if (typeof window !== "undefined") localStorage.setItem("dm_seen_intro", "1");
+    setShowIntro(false);
+  }
   const [loading, setLoading] = useState(false);
   const [createdRoomCode, setCreatedRoomCode] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -178,6 +190,33 @@ export default function Home() {
 
       {mode === "menu" && (
         <div className="flex flex-col items-center gap-4 w-80">
+          {showIntro && (
+            <div className="w-full rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-center">
+              <p className="stencil text-xs text-amber-400">New here?</p>
+              <p className="mt-1 text-[13px] text-steel-300">
+                Drydock Masters has some depth. The 5-minute{" "}
+                <b className="text-amber-400">Tutorial</b> teaches the whole loop — start there,
+                then jump into Local Play.
+              </p>
+              <div className="mt-2 flex justify-center gap-2">
+                <button
+                  onClick={() => {
+                    dismissIntro();
+                    setMode("tutorial");
+                  }}
+                  className="stencil rounded bg-amber-500 px-3 py-1 text-xs text-navy-900 hover:bg-amber-400"
+                >
+                  Start Tutorial
+                </button>
+                <button
+                  onClick={dismissIntro}
+                  className="stencil rounded border border-navy-600 px-3 py-1 text-xs text-navy-300 hover:text-steel-100"
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+          )}
           <a
             href="/daily"
             className="w-full rounded-lg bg-prestige py-3 text-lg font-bold text-navy-900 hover:bg-prestige/80 transition-colors block text-center"
