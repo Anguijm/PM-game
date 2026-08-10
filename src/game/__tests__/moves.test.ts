@@ -33,6 +33,9 @@ describe("stageWork", () => {
     const player = G.players["0"];
     // Slot 3 should be empty (BAWP fills 0-2)
     const card = player.hand[0];
+    // setupGame isn't seeded, so hand[0]'s cost varies; guarantee affordability
+    // (STARTING_MATERIAL is only 2) so this never no-ops on cost.
+    player.material = 20;
     const materialBefore = player.material;
 
     stageWork(makeCtx(G, "0"), card.id, 3);
